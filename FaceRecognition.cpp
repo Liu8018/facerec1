@@ -46,7 +46,7 @@ void FaceRecognition::getDescriptor(const cv::Mat &src, const dlib::full_object_
 {
     //提取描述子
     cv::Mat img;
-    cv::cvtColor(src, img, CV_BGR2GRAY);
+    cv::cvtColor(src, img, cv::COLOR_BGR2GRAY);
     dlib::array2d<dlib::bgr_pixel> dimg;
     dlib::assign_image(dimg, dlib::cv_image<uchar>(img));
             
@@ -59,4 +59,9 @@ void FaceRecognition::getDescriptor(const cv::Mat &src, const dlib::full_object_
 void FaceRecognition::init_updatedb()
 {
     updatedb(m_faceDescriptorsLib);
+}
+
+void FaceRecognition::init_loadDb()
+{
+    dlib::deserialize("./data/face_database/faceDescriptors.dat") >> m_faceDescriptorsLib;
 }

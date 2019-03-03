@@ -28,17 +28,20 @@ SOURCES += \
         mainwindow.cpp \
     FaceAlignment.cpp \
     FaceRecognition.cpp \
-    functions.cpp
+    functions.cpp \
+    SignUpDialog.cpp
 
 HEADERS += \
         mainwindow.h \
     FaceAlignment.h \
     FaceDetection.h \
     FaceRecognition.h \
-    functions.h
+    functions.h \
+    SignUpDialog.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    SignUpDialog.ui
 
 INCLUDEPATH += $$PWD/include
 LIBS += -L$$PWD/libs/ -lSimd -ldlib -lpthread -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs
