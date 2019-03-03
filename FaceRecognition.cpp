@@ -3,11 +3,15 @@
 
 FaceRecognition::FaceRecognition()
 {
-    //人脸数据库路径
-    m_facedbPath = "./data/face_database";
     
-    //加载模型
-    dlib::deserialize("./data/facerec_model/dlib_face_recognition_resnet_model_v1.dat") >> m_net;
+}
+
+void FaceRecognition::setMethod(std::string recMethod)
+{
+    method = recMethod;
+    
+    if(method == "resnet")
+        dlib::deserialize("./data/facerec_model/dlib_face_recognition_resnet_model_v1.dat") >> m_net;
 }
 
 bool FaceRecognition::recognize(const cv::Mat &src, const dlib::full_object_detection &shape, std::string &name)
@@ -64,4 +68,34 @@ void FaceRecognition::init_updatedb()
 void FaceRecognition::init_loadDb()
 {
     dlib::deserialize("./data/face_database/faceDescriptors.dat") >> m_faceDescriptorsLib;
+}
+
+void FaceRecognition::init_updateEIEdb()
+{
+    int nModels = 10;
+    m_eieModel.setInitPara(nModels,"./data/ELM_Models");
+    m_eieModel.loadStandardDataset("./data/face_database",1,50,50,1);
+    for(int i=0;i<nModels;i++)
+        m_eieModel.setSubModelHiddenNodes(i,100);
+    m_eieModel.fitSubModels();
+    m_eieModel.fitMainModel();
+    m_eieModel.save();
+}
+
+void FaceRecognition::init_loadEIEdb()
+{
+    m_eieModel.load("./data/ELM_Models");
+}
+
+bool FaceRecognition::recognize(const cv::Mat &faceImg, std::string &name)
+{
+    cv::Mat faceImg_gray;
+    if(faceImg.channels() == 3)
+        cv::cvtColor(faceImg,faceImg_gray,cv::COLOR_BGR2GRAY);
+    else
+        faceImg_gray = faceImg;
+    
+    m_eieModel.query(faceImg_gray,name);
+    
+    return true;
 }

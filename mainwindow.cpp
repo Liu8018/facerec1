@@ -23,10 +23,26 @@ MainWindow::MainWindow(QWidget *parent) :
     m_detection.Init(frameSize, 1.2, frameSize / 10);
     
     //初始化：人脸识别
-    if(access("./data/face_database/faceDescriptors.dat",F_OK) == -1)
-        m_rec.init_updatedb();
-    else
-        m_rec.init_loadDb();
+    m_rec.setMethod("elm");
+    
+    if(m_rec.method == "resnet")
+    {
+        //resnet人脸识别初始化
+        if(access("./data/face_database/faceDescriptors.dat",F_OK) == -1)
+            m_rec.init_updatedb();
+        else
+            m_rec.init_loadDb();
+    }
+    
+    if(m_rec.method == "elm")
+    {
+        //ELM_IN_ELM人脸识别初始化
+        if(access("./data/ELM_Models/mainModel.xml",F_OK) == -1)
+            m_rec.init_updateEIEdb();
+        else
+            m_rec.init_loadEIEdb();
+    }
+    
     m_isDoFaceRec = false;
     m_faceRecKeepTime = 5;
     
@@ -64,13 +80,21 @@ void MainWindow::updateFrame()
         
         if(m_isDoFaceRec)
         {
-            //人脸对齐
-            dlib::full_object_detection shape;
-            m_alignment.getShape(m_frame,objects[0].rect,shape);
-            
-            //人脸识别
             std::string name;
-            bool isInFaceDb = m_rec.recognize(m_frame,shape,name);
+            bool isInFaceDb = false;
+            
+            if(m_rec.method == "resnet")
+            {
+                //人脸对齐
+                dlib::full_object_detection shape;
+                m_alignment.getShape(m_frame,objects[0].rect,shape);
+                
+                //人脸识别
+                isInFaceDb = m_rec.recognize(m_frame,shape,name);
+            }
+            
+            if(m_rec.method == "elm")
+                isInFaceDb = m_rec.recognize(m_faceROI,name);
             
             //显示识别结果
             if(isInFaceDb)
@@ -152,4 +176,10 @@ void MainWindow::addFace(bool isSignUp, std::string name)
     filename += std::string(strTime) + ".jpg";
     
     cv::imwrite(filename,m_faceROI);
+    
+    //更新数据库
+    if(m_rec.method == "resnet")
+        m_rec.init_updatedb();
+    if(m_rec.method == "elm")
+        m_rec.init_updateEIEdb();
 }

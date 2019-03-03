@@ -29,7 +29,10 @@ SOURCES += \
     FaceAlignment.cpp \
     FaceRecognition.cpp \
     functions.cpp \
-    SignUpDialog.cpp
+    SignUpDialog.cpp \
+    ELM_functions.cpp \
+    elm_in_elm_model.cpp \
+    elm_model.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -37,7 +40,10 @@ HEADERS += \
     FaceDetection.h \
     FaceRecognition.h \
     functions.h \
-    SignUpDialog.h
+    SignUpDialog.h \
+    ELM_functions.h \
+    elm_in_elm_model.h \
+    elm_model.h
 
 FORMS += \
         mainwindow.ui \

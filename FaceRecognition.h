@@ -26,6 +26,8 @@
 #include <unistd.h>
 #include <dirent.h>
 
+#include "elm_in_elm_model.h"
+
 //定义好一堆模板别名，以供后续方便使用
 template <template <int,template<typename>class,int,typename> class block, int N, template<typename>class BN, typename SUBNET>
 using residual = dlib::add_prev1<block<N,BN,1,dlib::tag1<SUBNET>>>;
@@ -54,20 +56,31 @@ class FaceRecognition
 {
 public:
     FaceRecognition();
-        
+    
+    void setMethod(std::string recMethod);
+   
+    //dlib人脸识别    
     bool recognize(const cv::Mat &img, const dlib::full_object_detection &shape, std::string &name);
+    
+    //ELM_IN_ELM人脸识别
+    bool recognize(const cv::Mat &faceImg, std::string &name);
     
     void getDescriptor(const cv::Mat &src, const dlib::full_object_detection &shape, dlib::matrix<float,0,1> &faceDescriptor);
     
     void init_updatedb();
     void init_loadDb();
     
-private:
-    std::string m_facedbPath;
+    void init_updateEIEdb();
+    void init_loadEIEdb();
     
+    std::string method;
+    
+private:
     std::string m_modelPath;
     
     anet_type m_net;
+    
+    ELM_IN_ELM_Model m_eieModel;
     
     //人脸描述符库
     std::map<dlib::matrix<float,0,1>, std::string> m_faceDescriptorsLib;
