@@ -72,6 +72,8 @@ void FaceRecognition::init_loadDb()
 
 void FaceRecognition::init_updateEIEdb()
 {
+    m_eieModel = ELM_IN_ELM_Model();
+    
     int nModels = 10;
     m_eieModel.setInitPara(nModels,"./data/ELM_Models");
     m_eieModel.loadStandardDataset("./data/face_database",1,50,50,1);
@@ -88,6 +90,7 @@ void FaceRecognition::init_updateEIEdb()
 void FaceRecognition::updateEIEdb(const cv::Mat &img, const std::string label)
 {
     m_eieModel.trainNewImg(img,label);
+    m_eieModel.save();
 }
 
 void FaceRecognition::init_loadEIEdb()

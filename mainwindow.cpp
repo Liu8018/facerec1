@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //初始化：检测器
     m_detection.Load("./data/cascade/haar_face_0.xml");
     SimdDetection::Size frameSize(m_capture.get(3),m_capture.get(4));
-    m_detection.Init(frameSize, 1.2, frameSize / 10);
+    m_detection.Init(frameSize, 1.2, frameSize / 5);
     
     //初始化：人脸识别
     m_rec.setMethod("elm");
@@ -187,7 +187,10 @@ void MainWindow::addFace(bool isSignUp, std::string name)
     if(m_rec.method == "elm")
     {
         if(isNewClass)
+        {
+            
             m_rec.init_updateEIEdb();
+        }
         else
             m_rec.updateEIEdb(m_faceROI,name);
     }

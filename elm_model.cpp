@@ -35,11 +35,14 @@ void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::
     
     //转化label为target
     label2target(labels,m_Target);
-    
+    std::cout<<"test4.5.1"<<std::endl;
+    std::cout<<"width:"<<m_width<<" height:"<<m_height<<std::endl;
     m_inputLayerData.create(cv::Size(m_I,m_Q),CV_32F);
     for(int i=0;i<mats.size();i++)
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
+    std::cout<<"test4.5.2"<<std::endl;
     mats2lines(mats,m_inputLayerData,m_channels);
+    std::cout<<"test4.5.3"<<std::endl;
     normalize_img(m_inputLayerData);
     
 //std::cout<<"m_Target:\n"<<m_Target<<std::endl;
