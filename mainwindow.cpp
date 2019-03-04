@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_detection.Init(frameSize, 1.2, frameSize / 5);
     
     //初始化：人脸识别
-    m_rec.setMethod("elm");
+    m_rec.setMethod("resnet");
     
     if(m_rec.method == "resnet")
     {
@@ -87,10 +87,10 @@ void MainWindow::updateFrame()
             {
                 //人脸对齐
                 dlib::full_object_detection shape;
-                m_alignment.getShape(m_frame,objects[0].rect,shape);
+                m_alignment.getShape(m_frameSrc,objects[0].rect,shape);
                 
                 //人脸识别
-                isInFaceDb = m_rec.recognize(m_frame,shape,name);
+                isInFaceDb = m_rec.recognize(m_frameSrc,shape,name);
             }
             
             if(m_rec.method == "elm")
@@ -187,10 +187,7 @@ void MainWindow::addFace(bool isSignUp, std::string name)
     if(m_rec.method == "elm")
     {
         if(isNewClass)
-        {
-            
             m_rec.init_updateEIEdb();
-        }
         else
             m_rec.updateEIEdb(m_faceROI,name);
     }
