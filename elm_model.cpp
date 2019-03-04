@@ -264,6 +264,7 @@ void ELM_Model::save(std::string path, std::string K_path)
     fswrite<<"channels"<<m_channels;
     fswrite<<"width"<<m_width;
     fswrite<<"height"<<m_height;
+    fswrite<<"m_H"<<m_H;
     fswrite<<"W_IH"<<m_W_IH;
     fswrite<<"W_HO"<<m_W_HO;
     fswrite<<"B_H"<<m_B_H;
@@ -287,6 +288,7 @@ void ELM_Model::load(std::string path, std::string K_path)
     fsread["channels"]>>m_channels;
     fsread["width"]>>m_width;
     fsread["height"]>>m_height;
+    fsread["m_H"]>>m_H;
     fsread["W_IH"]>>m_W_IH;
     fsread["W_HO"]>>m_W_HO;
     fsread["B_H"]>>m_B_H;
@@ -319,4 +321,40 @@ void ELM_Model::loadStandardDataset(const std::string datasetPath, const float t
 
     inputData_2d(trainImgs,trainLabelBins,resizeWidth,resizeHeight,channels);
     inputData_2d_test(testImgs,testLabelBins);
+}
+
+void ELM_Model::clearTrainData()
+{
+    if(!m_inputLayerData.empty())
+        m_inputLayerData.release();
+    if(!m_H_output.empty())
+        m_H_output.release();
+    if(!m_Target.empty())
+        m_Target.release();
+    if(!m_inputLayerData_test.empty())
+        m_inputLayerData_test.release();
+    if(!m_Target_test.empty())
+        m_Target_test.release();
+}
+
+void ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
+{
+    clearTrainData();
+    
+    std::vector<bool> labelBin(m_O,0);
+    for(int i=0;i<m_label_string.size();i++)
+        if(label == m_label_string[i])
+        {
+            labelBin[i] = 1;
+            break;
+        }
+    std::vector<std::vector<bool>> trainLabels;
+    trainLabels.push_back(labelBin);
+    
+    std::vector<cv::Mat> trainMats;
+    trainMats.push_back(img);
+    
+    inputData_2d(trainMats,trainLabels,m_width,m_height,m_channels);
+    
+    fit();
 }

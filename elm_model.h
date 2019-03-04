@@ -24,6 +24,8 @@ public:
     //训练
     void fit(int batchSize = -1, bool validating = true);
     
+    void trainNewImg(const cv::Mat &img, const std::string label);
+    
     //查询
     void query(const cv::Mat &mat, std::string &label);
     void query(const cv::Mat &mat, cv::Mat &output);
@@ -39,7 +41,10 @@ public:
     
     void loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle=true);
     
+    //清除模型参数
     void clear();
+    //清除训练数据
+    void clearTrainData();
     
     //计算在测试数据上的准确率
     float validate();

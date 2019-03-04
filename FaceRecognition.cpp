@@ -80,6 +80,14 @@ void FaceRecognition::init_updateEIEdb()
     m_eieModel.fitSubModels();
     m_eieModel.fitMainModel();
     m_eieModel.save();
+    
+    //释放内存空间
+    m_eieModel.clearTrainData();
+}
+
+void FaceRecognition::updateEIEdb(const cv::Mat &img, const std::string label)
+{
+    m_eieModel.trainNewImg(img,label);
 }
 
 void FaceRecognition::init_loadEIEdb()

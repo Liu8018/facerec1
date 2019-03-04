@@ -22,10 +22,14 @@ public:
     void fitSubModels(int batchSize = -1, bool validating = true);
     void fitMainModel(int batchSize = -1, bool validating = true);
     
+    void trainNewImg(const cv::Mat &img, const std::string label);
+    
     void save();
     void load(std::string modelDir);
     
     void query(const cv::Mat &mat, std::string &label);
+    
+    void clearTrainData();
     
     //计算在测试数据上的准确率
     float validate();

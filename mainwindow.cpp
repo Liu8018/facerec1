@@ -163,8 +163,12 @@ void MainWindow::addFace(bool isSignUp, std::string name)
     std::string filename = "./data/face_database/" + name;
     
     //若不存在则新建
+    bool isNewClass = 0;
     if(access(filename.data(),F_OK) == -1)
+    {
         mkdir(filename.data(),00777);
+        isNewClass = 1;
+    }
     
     filename += "/";
     
@@ -181,5 +185,10 @@ void MainWindow::addFace(bool isSignUp, std::string name)
     if(m_rec.method == "resnet")
         m_rec.init_updatedb();
     if(m_rec.method == "elm")
-        m_rec.init_updateEIEdb();
+    {
+        if(isNewClass)
+            m_rec.init_updateEIEdb();
+        else
+            m_rec.updateEIEdb(m_faceROI,name);
+    }
 }

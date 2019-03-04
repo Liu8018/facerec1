@@ -73,6 +73,8 @@ public:
     void init_updateEIEdb();
     void init_loadEIEdb();
     
+    void updateEIEdb(const cv::Mat &img, const std::string label);
+    
     std::string method;
     
 private:

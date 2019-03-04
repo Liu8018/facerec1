@@ -118,7 +118,7 @@ void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating)
     int M = m_n_models;
     if(batchSize==-1)
         batchSize = m_trainImgs.size();
-    m_C = m_trainLabelBins[0].size();
+    m_C = m_label_string.size();
     cv::Mat H(cv::Size(M*m_C,batchSize),CV_32F);
     cv::Mat batchTarget(cv::Size(m_C,batchSize),CV_32F);
     
@@ -297,6 +297,7 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
     K_fsread["K"]>>m_K;
     K_fsread.release();
 
+    //加载子模型
     m_subModels.resize(m_n_models);
     for(int m=0;m<m_n_models;m++)
         m_subModels[m].load(m_modelPath+"subModel"+std::to_string(m)+".xml",
@@ -319,4 +320,36 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, std::string &label)
     int maxId = getMaxId(output);
     
     label.assign(m_label_string[maxId]);
+}
+
+void ELM_IN_ELM_Model::clearTrainData()
+{
+    m_subModelToTrain.clearTrainData();
+    for(int i=0;i<m_n_models;i++)
+        m_subModels[i].clearTrainData();
+    
+    m_trainImgs.clear();
+    m_trainLabelBins.clear();
+    m_testImgs.clear();
+    m_testLabelBins.clear();
+}
+
+void ELM_IN_ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
+{
+    clearTrainData();
+    
+    m_trainImgs.push_back(img);
+    
+    std::vector<bool> labelBin(m_C,0);
+    for(int i=0;i<m_label_string.size();i++)
+        if(label == m_label_string[i])
+        {
+            labelBin[i] = 1;
+            break;
+        }
+    m_trainLabelBins.push_back(labelBin);
+    m_Q = 1;
+    
+    fitSubModels();
+    fitMainModel();
 }
