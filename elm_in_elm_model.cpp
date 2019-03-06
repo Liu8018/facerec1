@@ -68,10 +68,8 @@ void ELM_IN_ELM_Model::loadMnistData(const std::string path, const float trainSa
 
 void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating)
 {
-    std::cout<<"test4.1"<<std::endl;
     if(m_subModels.empty())
     {
-        std::cout<<"test4.2"<<std::endl;
         m_subModelToTrain.inputData_2d(m_trainImgs,m_trainLabelBins,m_width,m_height,m_channels);
         m_subModelToTrain.inputData_2d_test(m_testImgs,m_testLabelBins);
         
@@ -80,7 +78,6 @@ void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating)
         //训练子模型
         for(int i=0;i<m_n_models;i++)
         {
-            std::cout<<"test4.3"<<std::endl;
             if(m_subModelHiddenNodes[i] != -1)
                 m_subModelToTrain.setHiddenNodes(m_subModelHiddenNodes[i]);
             m_subModelToTrain.setRandomState(randomState++);
@@ -93,20 +90,14 @@ void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating)
     }
     else
     {
-        std::cout<<"test4.4"<<std::endl;
         for(int i=0;i<m_n_models;i++)
         {
-            std::cout<<"test4.5"<<std::endl;
             m_subModels[i].inputData_2d(m_trainImgs,m_trainLabelBins,m_width,m_height,m_channels);
-            std::cout<<"test4.6"<<std::endl;
             m_subModels[i].inputData_2d_test(m_testImgs,m_testLabelBins);
-            std::cout<<"test4.7"<<std::endl;
             
             m_subModels[i].fit(batchSize, validating);
-            std::cout<<"test4.8"<<std::endl;
             m_subModels[i].save(m_modelPath+"subModel"+std::to_string(i)+".xml",
                                    m_modelPath+"subK"+std::to_string(i)+".xml");
-            std::cout<<"test4.9"<<std::endl;
         }
     }
 }
@@ -348,11 +339,8 @@ void ELM_IN_ELM_Model::clearTrainData()
 
 void ELM_IN_ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
 {
-    std::cout<<"test1"<<std::endl;
     clearTrainData();
-    std::cout<<"test2"<<std::endl;
     m_trainImgs.push_back(img);
-    std::cout<<"test3"<<std::endl;
     std::vector<bool> labelBin(m_C,0);
     for(int i=0;i<m_label_string.size();i++)
         if(label == m_label_string[i])
@@ -362,10 +350,7 @@ void ELM_IN_ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
         }
     m_trainLabelBins.push_back(labelBin);
     m_Q = 1;
-    std::cout<<"test4"<<std::endl;
     
     fitSubModels();
-    std::cout<<"test5"<<std::endl;
     fitMainModel();
-    std::cout<<"test6"<<std::endl;
 }

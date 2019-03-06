@@ -1,12 +1,7 @@
 #include "FaceRecognition.h"
 #include "functions.h"
 
-FaceRecognition::FaceRecognition()
-{
-    
-}
-
-void FaceRecognition::setMethod(std::string recMethod)
+FaceRecognition::FaceRecognition(std::string recMethod)
 {
     method = recMethod;
     
@@ -14,68 +9,8 @@ void FaceRecognition::setMethod(std::string recMethod)
         dlib::deserialize("./data/facerec_model/dlib_face_recognition_resnet_model_v1.dat") >> m_net;
 }
 
-void dlibPoint2cvPoint(const dlib::full_object_detection &S, std::vector<cv::Point> &L)
-{
-    for(unsigned int i = 0; i<S.num_parts();++i)
-        L.push_back(cv::Point(S.part(i).x(),S.part(i).y()));
-}
-
-void line_one_face_detections(cv::Mat img, std::vector<dlib::full_object_detection> fs)
-{
-    int i, j;
-
-    for(j=0; j<fs.size(); j++)
-    {
-        cv::Point p1, p2;
-
-        for(i = 0; i<67; i++)
-        {
-            // 下巴到脸颊 0 ~ 16
-            //左边眉毛 17 ~ 21
-            //右边眉毛 21 ~ 26
-            //鼻梁     27 ~ 30
-            //鼻孔        31 ~ 35
-            //左眼        36 ~ 41
-            //右眼        42 ~ 47
-            //嘴唇外圈  48 ~ 59
-            //嘴唇内圈  59 ~ 67
-            switch(i)
-            {
-                case 16:
-                case 21:
-                case 26:
-                case 30:
-                case 35:
-                case 41:
-                case 47:
-                case 59:
-                    i++;
-                    break;
-                default:
-                    break;
-            }
-
-            p1.x = fs[j].part(i).x();
-            p1.y = fs[j].part(i).y();
-            p2.x = fs[j].part(i+1).x();
-            p2.y = fs[j].part(i+1).y();
-            cv::line(img, p1, p2, cv::Scalar(0,0,255), 1);
-        }
-
-    }
-}
-
 bool FaceRecognition::recognize(const cv::Mat &src, const dlib::full_object_detection &shape, std::string &name)
-{
-    std::vector<cv::Point> landmarks;
-    dlibPoint2cvPoint(shape,landmarks);
-    
-    cv::Mat image = src.clone();
-    std::vector<dlib::full_object_detection> shapes;
-    shapes.push_back(shape);
-    line_one_face_detections(image,shapes);
-    cv::imshow("testImage",image);
-        
+{        
     //提取描述子
     dlib::matrix<float,0,1> faceDescriptor;
     getDescriptor(src,shape,faceDescriptor);
@@ -87,7 +22,7 @@ bool FaceRecognition::recognize(const cv::Mat &src, const dlib::full_object_dete
     {
         float distance = dlib::length(it->first - faceDescriptor);
         
-        std::cout << "name: " << it->second << " distance: " << distance << std::endl;
+        //std::cout << "name: " << it->second << " distance: " << distance << std::endl;
         
         if(distance < minDistance)
         {
@@ -95,7 +30,7 @@ bool FaceRecognition::recognize(const cv::Mat &src, const dlib::full_object_dete
             nearestFaceName = it->second;
         }
     }
-    std::cout<<"---"<<std::endl;
+    //std::cout<<"---"<<std::endl;
     
     if(minDistance < 0.40)
     {

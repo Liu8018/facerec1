@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_detection.Init(frameSize, 1.2, frameSize / 5);
     
     //初始化：人脸识别
-    m_rec.setMethod("resnet");
+    m_rec = FaceRecognition("resnet");
     
     if(m_rec.method == "resnet")
     {
@@ -173,16 +173,23 @@ void MainWindow::addFace(bool isSignUp, std::string name)
     filename += "/";
     
     //输出
-    time_t t = time(0);
-    char strTime[64];
-    strftime(strTime, 64, "%Y-%m-%d-%H-%M-%S", localtime(&t));
-    
-    filename += std::string(strTime) + ".jpg";
+    if(isNewClass)
+    {
+        filename += name + ".jpg";
+    }
+    else
+    {
+        time_t t = time(0);
+        char strTime[64];
+        strftime(strTime, 64, "%Y-%m-%d-%H-%M-%S", localtime(&t));
+        
+        filename += std::string(strTime) + ".jpg";
+    }
     
     cv::imwrite(filename,m_faceROI);
     
     //更新数据库
-    if(m_rec.method == "resnet")
+    if(m_rec.method == "resnet" && isNewClass)
         m_rec.init_updatedb();
     if(m_rec.method == "elm")
     {

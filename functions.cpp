@@ -55,7 +55,7 @@ void updatedb(std::map<dlib::matrix<float,0,1>, std::string> &faceDescriptorsLib
     std::string facedbPath = "./data/face_database";
     
     FaceAlignment alignment;
-    FaceRecognition recognition;
+    FaceRecognition recognition("resnet");
     
     std::map<std::string, std::string> files;
     getFiles(facedbPath, files);

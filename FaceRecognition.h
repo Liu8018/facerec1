@@ -55,9 +55,8 @@ using anet_type = dlib::loss_metric<dlib::fc_no_bias<128,dlib::avg_pool_everythi
 class FaceRecognition
 {
 public:
-    FaceRecognition();
-    
-    void setMethod(std::string recMethod);
+    FaceRecognition() {}
+    FaceRecognition(std::string recMethod);
    
     //dlib人脸识别    
     bool recognize(const cv::Mat &img, const dlib::full_object_detection &shape, std::string &name);
