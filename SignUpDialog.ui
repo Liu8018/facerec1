@@ -7,17 +7,17 @@
     <x>0</x>
     <y>0</y>
     <width>433</width>
-    <height>481</height>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>登记</string>
   </property>
   <widget class="QPushButton" name="pushButton_OK">
    <property name="geometry">
     <rect>
-     <x>310</x>
-     <y>440</y>
+     <x>330</x>
+     <y>430</y>
      <width>87</width>
      <height>29</height>
     </rect>
@@ -29,8 +29,8 @@
   <widget class="QPushButton" name="pushButton_Cancel">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>440</y>
+     <x>230</x>
+     <y>430</y>
      <width>87</width>
      <height>29</height>
     </rect>
@@ -55,15 +55,27 @@
     <string/>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>440</y>
-     <width>113</width>
-     <height>29</height>
+     <x>10</x>
+     <y>430</y>
+     <width>198</width>
+     <height>31</height>
     </rect>
    </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>请输入姓名：</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="lineEdit"/>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

@@ -183,14 +183,16 @@ void MainWindow::addFace(bool isSignUp, std::string name)
         char strTime[64];
         strftime(strTime, 64, "%Y-%m-%d-%H-%M-%S", localtime(&t));
         
-        filename += std::string(strTime) + ".jpg";
+        filename += name+std::string(strTime) + ".jpg";
     }
     
     cv::imwrite(filename,m_faceROI);
     
     //更新数据库
     if(m_rec.method == "resnet" && isNewClass)
+    {
         m_rec.init_updatedb();
+    }
     if(m_rec.method == "elm")
     {
         if(isNewClass)

@@ -15,8 +15,6 @@ class FaceAlignment
 public:
     FaceAlignment();
     
-    //void process(const cv::Mat &inputImg, const cv::Rect &faceRect, cv::Mat &sFace);
-    
     void getShape(const cv::Mat &inputImg, const cv::Rect &faceRect, dlib::full_object_detection &shape);
     
 private:
