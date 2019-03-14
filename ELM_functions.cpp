@@ -301,6 +301,32 @@ int getMaxId(const cv::Mat &line)
     return maxIdx[1];
 }
 
+int getMinId(const cv::Mat &line)
+{
+    double minVal,maxVal;
+    int minIdx[2],maxIdx[2];
+    
+    cv::minMaxIdx(line,&minVal,&maxVal,minIdx,maxIdx);
+    
+    return minIdx[1];
+}
+
+void getMaxNId(const cv::Mat &line, int n, std::vector<int> &ids)
+{
+    cv::Mat tmpLine = line.clone();
+    
+    ids.resize(n);
+    
+    float minVal = line.at<float>(0,getMinId(line));
+    
+    for(int i=0;i<n;i++)
+    {
+        ids[i] = getMaxId(tmpLine);
+        
+        tmpLine.at<float>(0,ids[i]) = minVal;
+    }
+}
+
 float calcScore(const cv::Mat &outputData, const cv::Mat &target)
 {
     int score = 0;

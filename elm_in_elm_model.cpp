@@ -325,6 +325,36 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, std::string &label)
     label.assign(m_label_string[maxId]);
 }
 
+void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string> &labels)
+{
+    if(n>m_C)
+        n = m_C;
+    
+    cv::Mat H(cv::Size(m_n_models*m_C,1),CV_32F);
+    
+    for(int m=0;m<m_n_models;m++)
+    {
+        cv::Mat ROI = H(cv::Range(0,1),cv::Range(m*m_C,(m+1)*m_C));
+        m_subModels[m].query(mat,ROI);
+        normalize(ROI);
+    }
+    
+    cv::Mat output = H * m_F;
+    
+    //std::cout<<"output:\n"<<output<<std::endl;
+    
+    std::vector<int> ids;
+    getMaxNId(output,n,ids);
+    
+    //for(int i=0;i<n;i++)
+    //    std::cout<<"ids["<<i<<"]:"<<ids[i]<<std::endl;
+    
+    labels.resize(n);
+    
+    for(int i=0;i<n;i++)
+        labels[i].assign(m_label_string[ids[i]]);
+}
+
 void ELM_IN_ELM_Model::clearTrainData()
 {
     m_subModelToTrain.clearTrainData();

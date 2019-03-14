@@ -105,3 +105,16 @@ bool FaceRecognition::recognize(const cv::Mat &faceImg, std::string &name)
     
     return true;
 }
+
+bool FaceRecognition::recognize(const cv::Mat &faceImg, int n, std::vector<std::string> &names)
+{
+    cv::Mat faceImg_gray;
+    if(faceImg.channels() == 3)
+        cv::cvtColor(faceImg,faceImg_gray,cv::COLOR_BGR2GRAY);
+    else
+        faceImg_gray = faceImg;
+    
+    m_eieModel.query(faceImg_gray,n,names);
+    
+    return true;
+}

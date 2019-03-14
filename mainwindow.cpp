@@ -23,7 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_detection.Init(frameSize, 1.2, frameSize / 5);
     
     //初始化：人脸识别
-    m_rec = FaceRecognition("resnet");
+    //m_rec = FaceRecognition("resnet");
+    m_rec = FaceRecognition("elm");
     
     if(m_rec.method == "resnet")
     {
@@ -94,7 +95,16 @@ void MainWindow::updateFrame()
             }
             
             if(m_rec.method == "elm")
-                isInFaceDb = m_rec.recognize(m_faceROI,name);
+            {
+                int n = 2;
+                std::vector<std::string> names;
+                isInFaceDb = m_rec.recognize(m_faceROI,n,names);
+                
+                //for(int i=0;i<n;i++)
+                //    std::cout<<"names["<<i<<"]:"<<names[i]<<std::endl;
+                
+                name = names[0];
+            }
             
             //显示识别结果
             if(isInFaceDb)

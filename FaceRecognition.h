@@ -63,6 +63,7 @@ public:
     
     //ELM_IN_ELM人脸识别
     bool recognize(const cv::Mat &faceImg, std::string &name);
+    bool recognize(const cv::Mat &faceImg, int n, std::vector<std::string> &names);
     
     void getDescriptor(const cv::Mat &src, const dlib::full_object_detection &shape, dlib::matrix<float,0,1> &faceDescriptor);
     

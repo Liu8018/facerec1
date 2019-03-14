@@ -29,6 +29,9 @@ public:
     
     void query(const cv::Mat &mat, std::string &label);
     
+    //得到前n个最大值ID
+    void query(const cv::Mat &mat, int n, std::vector<std::string> &labels);
+    
     void clearTrainData();
     
     //计算在测试数据上的准确率

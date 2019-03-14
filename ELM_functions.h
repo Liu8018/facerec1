@@ -55,6 +55,7 @@ void traverseFile(const std::string directory, std::vector<std::string> &files);
 
 //找最大值
 int getMaxId(const cv::Mat &line);
+void getMaxNId(const cv::Mat &line, int n, std::vector<int> &ids);
 
 //计分
 float calcScore(const cv::Mat &outputData, const cv::Mat &target);
