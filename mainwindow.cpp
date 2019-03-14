@@ -96,9 +96,14 @@ void MainWindow::updateFrame()
             
             if(m_rec.method == "elm")
             {
+                //人脸对齐
+                cv::Mat alignedFaceROI;
+                m_alignment.alignFace(m_frameSrc,objects[0].rect,alignedFaceROI);
+                
+                //人脸识别
                 int n = 2;
                 std::vector<std::string> names;
-                isInFaceDb = m_rec.recognize(m_faceROI,n,names);
+                isInFaceDb = m_rec.recognize(alignedFaceROI,n,names);
                 
                 //for(int i=0;i<n;i++)
                 //    std::cout<<"names["<<i<<"]:"<<names[i]<<std::endl;

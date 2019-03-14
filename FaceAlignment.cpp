@@ -26,3 +26,36 @@ void FaceAlignment::getShape(const cv::Mat &inputImg, const cv::Rect &faceRect, 
     cvRect2dlibRect(faceRect,face_dlibRect);
     shape = m_shapePredictor(cimg,face_dlibRect);
 }
+
+void FaceAlignment::alignFace(const cv::Mat &inputImg, const cv::Rect &faceRect, cv::Mat &resultImg)
+{
+    dlib::full_object_detection shape;
+    getShape(inputImg,faceRect,shape);
+    
+    //shape转化为landmarks
+    std::vector<cv::Point> landmarks;
+    dlibPoint2cvPoint(shape,landmarks);
+    
+    //test
+    /*cv::Mat image = inputImg.clone();
+    cv::line(image,landmarks[45],landmarks[36],cv::Scalar(0,255,0),1);
+    for(int i=0;i<landmarks.size();i++)
+    {
+        cv::circle(image,landmarks[i],3,cv::Scalar(255,0,0));
+        cv::putText(image,std::to_string(i),landmarks[i],1,1,cv::Scalar(0,255,0));
+    }
+    cv::imshow("testImage",image);*/
+    
+    //根据两眼连线对齐人脸
+    cv::Mat faceROI = inputImg(faceRect);
+    cv::Point leye = landmarks[36];
+    cv::Point reye = landmarks[45];
+    cv::Point center = cv::Point(faceROI.cols/2,faceROI.rows/2);
+    double dy = reye.y - leye.y; 
+    double dx = reye.x - leye.x; 
+    double angle = atan2(dy, dx) * 180.0 / CV_PI; 
+    cv::Mat rotMat = cv::getRotationMatrix2D(center, angle, 1); 
+    cv::warpAffine(faceROI, resultImg, rotMat, faceROI.size());
+    
+    //cv::imshow("testResult",resultImg);
+}
