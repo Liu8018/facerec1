@@ -22,6 +22,9 @@ void ELM_Model::clear()
 void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::vector<bool>> &labels, 
                              const int resizeWidth, const int resizeHeight, const int channels)
 {
+    if(mats.empty())
+        return;
+    
     m_channels = channels;
     m_width = resizeWidth;
     m_height = resizeHeight;
@@ -49,6 +52,9 @@ void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::
 
 void ELM_Model::inputData_2d_test(std::vector<cv::Mat> &mats, const std::vector<std::vector<bool> > &labels)
 {
+    if(mats.empty())
+        return;
+    
     m_Q_test = mats.size();
     
     label2target(labels,m_Target_test);
@@ -90,6 +96,9 @@ void ELM_Model::setRandomState(int randomState)
 
 void ELM_Model::fit(int batchSize, bool validating)
 {
+    if(m_inputLayerData.empty())
+        return;
+    
     //检查隐藏层节点数是否被设置
     if(m_H == -1)
         m_H = m_Q/2;
@@ -259,6 +268,9 @@ void ELM_Model::batchQuery(std::vector<cv::Mat> &inputMats, cv::Mat &outputMat)
 
 void ELM_Model::save(std::string path, std::string K_path)
 {
+    if(m_W_HO.empty())
+        return;
+    
     cv::FileStorage fswrite(path,cv::FileStorage::WRITE);
     
     fswrite<<"channels"<<m_channels;

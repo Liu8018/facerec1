@@ -70,8 +70,11 @@ void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating)
 {
     if(m_subModels.empty())
     {
+        std::cout<<"test3.1"<<std::endl;
         m_subModelToTrain.inputData_2d(m_trainImgs,m_trainLabelBins,m_width,m_height,m_channels);
+        std::cout<<"test3.2"<<std::endl;
         m_subModelToTrain.inputData_2d_test(m_testImgs,m_testLabelBins);
+        std::cout<<"test3.3"<<std::endl;
         
         int randomState = (unsigned)time(NULL);
         
@@ -104,6 +107,9 @@ void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating)
 
 void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating)
 {
+    if(m_trainImgs.empty())
+        return;
+    
     //载入子模型
     if(m_subModels.empty())
     {
@@ -259,6 +265,9 @@ float ELM_IN_ELM_Model::validate()
 
 void ELM_IN_ELM_Model::save()
 {
+    if(m_F.empty())
+        return;
+    
     cv::FileStorage fswrite(m_modelPath+"mainModel.xml",cv::FileStorage::WRITE);
     
     fswrite<<"n_models"<<m_n_models;
@@ -327,6 +336,9 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, std::string &label)
 
 void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string> &labels)
 {
+    if(m_F.empty())
+        return;
+    
     if(n>m_C)
         n = m_C;
     
@@ -357,6 +369,9 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
 
 void ELM_IN_ELM_Model::clearTrainData()
 {
+    if(m_trainImgs.empty())
+        return;
+    
     m_subModelToTrain.clearTrainData();
     for(int i=0;i<m_n_models;i++)
         m_subModels[i].clearTrainData();

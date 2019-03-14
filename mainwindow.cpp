@@ -108,7 +108,10 @@ void MainWindow::updateFrame()
                 //for(int i=0;i<n;i++)
                 //    std::cout<<"names["<<i<<"]:"<<names[i]<<std::endl;
                 
-                name = names[0];
+                if(!names.empty())
+                    name = names[0];
+                else
+                    name = "others";
             }
             
             //显示识别结果
