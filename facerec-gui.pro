@@ -51,3 +51,6 @@ FORMS += \
 
 INCLUDEPATH += $$PWD/include
 LIBS += -L$$PWD/libs/ -lSimd -ldlib -lpthread -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs
+
+RESOURCES += \
+    resources.qrc

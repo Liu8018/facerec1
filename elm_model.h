@@ -22,7 +22,7 @@ public:
     void setActivation(const std::string method);
     
     //训练
-    void fit(int batchSize = -1, bool validating = true);
+    void fit(int batchSize = -1, bool validating = true, bool verbose = true);
     
     void trainNewImg(const cv::Mat &img, const std::string label);
     

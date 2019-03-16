@@ -67,24 +67,14 @@ void FaceRecognition::init_loadDb()
 
 void FaceRecognition::init_updateEIEdb()
 {
-    m_eieModel = ELM_IN_ELM_Model();
+    refitEIEModel();
     
-    int nModels = 10;
-    m_eieModel.setInitPara(nModels,"./data/ELM_Models");
-    m_eieModel.loadStandardDataset("./data/face_database",1,50,50,1);
-    for(int i=0;i<nModels;i++)
-        m_eieModel.setSubModelHiddenNodes(i,100);
-    m_eieModel.fitSubModels();
-    m_eieModel.fitMainModel();
-    m_eieModel.save();
-    
-    //释放内存空间
-    m_eieModel.clearTrainData();
+    m_eieModel.load("./data/ELM_Models");
 }
 
 void FaceRecognition::updateEIEdb(const cv::Mat &img, const std::string label)
 {
-    m_eieModel.trainNewImg(img,label);
+    m_eieModel.trainNewFace(img,label);
     m_eieModel.save();
 }
 
@@ -95,26 +85,14 @@ void FaceRecognition::init_loadEIEdb()
 
 bool FaceRecognition::recognize(const cv::Mat &faceImg, std::string &name)
 {
-    cv::Mat faceImg_gray;
-    if(faceImg.channels() == 3)
-        cv::cvtColor(faceImg,faceImg_gray,cv::COLOR_BGR2GRAY);
-    else
-        faceImg_gray = faceImg;
-    
-    m_eieModel.query(faceImg_gray,name);
+    m_eieModel.queryFace(faceImg,name);
     
     return true;
 }
 
 bool FaceRecognition::recognize(const cv::Mat &faceImg, int n, std::vector<std::string> &names)
 {
-    cv::Mat faceImg_gray;
-    if(faceImg.channels() == 3)
-        cv::cvtColor(faceImg,faceImg_gray,cv::COLOR_BGR2GRAY);
-    else
-        faceImg_gray = faceImg;
-    
-    m_eieModel.query(faceImg_gray,n,names);
+    m_eieModel.queryFace(faceImg,n,names);
     
     return true;
 }

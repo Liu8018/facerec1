@@ -54,6 +54,34 @@ void ELM_IN_ELM_Model::loadStandardDataset(const std::string path, const float t
     m_Q = m_trainImgs.size();
 }
 
+void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const float trainSampleRatio, 
+                                               const int resizeWidth, const int resizeHeight, bool shuffle)
+{
+    m_width = resizeWidth;
+    m_height = resizeHeight;
+    m_channels = 1;
+    
+    inputImgsFrom(path,m_label_string,m_trainImgs,
+                  m_testImgs,m_trainLabelBins,m_testLabelBins,
+                  trainSampleRatio,m_channels,shuffle);
+    m_C = m_label_string.size();
+    m_Q = m_trainImgs.size();
+    
+    //提取输入图像的lbp特征
+    for(int i=0;i<m_trainImgs.size();i++)
+    {
+        cv::Mat lbp;
+        LBP81(m_trainImgs[i],lbp);
+        lbp.copyTo(m_trainImgs[i]);
+    }
+    for(int i=0;i<m_testImgs.size();i++)
+    {
+        cv::Mat lbp;
+        LBP81(m_testImgs[i],lbp);
+        lbp.copyTo(m_testImgs[i]);
+    }
+}
+
 void ELM_IN_ELM_Model::loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle)
 {
     loadMnistData_csv(path,trainSampleRatio,
@@ -66,16 +94,12 @@ void ELM_IN_ELM_Model::loadMnistData(const std::string path, const float trainSa
     m_channels = 1;
 }
 
-void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating)
+void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating, bool verbose)
 {
     if(m_subModels.empty())
     {
-        std::cout<<"test3.1"<<std::endl;
         m_subModelToTrain.inputData_2d(m_trainImgs,m_trainLabelBins,m_width,m_height,m_channels);
-        std::cout<<"test3.2"<<std::endl;
         m_subModelToTrain.inputData_2d_test(m_testImgs,m_testLabelBins);
-        std::cout<<"test3.3"<<std::endl;
-        
         int randomState = (unsigned)time(NULL);
         
         //训练子模型
@@ -84,7 +108,7 @@ void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating)
             if(m_subModelHiddenNodes[i] != -1)
                 m_subModelToTrain.setHiddenNodes(m_subModelHiddenNodes[i]);
             m_subModelToTrain.setRandomState(randomState++);
-            m_subModelToTrain.fit(batchSize, validating);
+            m_subModelToTrain.fit(batchSize, validating,verbose);
             m_subModelToTrain.save(m_modelPath+"subModel"+std::to_string(i)+".xml",
                                    m_modelPath+"subK"+std::to_string(i)+".xml");
             
@@ -98,14 +122,14 @@ void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating)
             m_subModels[i].inputData_2d(m_trainImgs,m_trainLabelBins,m_width,m_height,m_channels);
             m_subModels[i].inputData_2d_test(m_testImgs,m_testLabelBins);
             
-            m_subModels[i].fit(batchSize, validating);
+            m_subModels[i].fit(batchSize, validating,verbose);
             m_subModels[i].save(m_modelPath+"subModel"+std::to_string(i)+".xml",
                                    m_modelPath+"subK"+std::to_string(i)+".xml");
         }
     }
 }
 
-void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating)
+void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating, bool verbose)
 {
     if(m_trainImgs.empty())
         return;
@@ -132,10 +156,13 @@ void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating)
     label2target(m_trainLabelBins,allTarget);
     
     //输出矩阵大小信息
-    std::cout<<"Q: "<<m_Q<<std::endl
-             <<"batchSize: "<<batchSize<<std::endl
-             <<"M: "<<M<<std::endl
-             <<"C: "<<m_C<<std::endl;
+    if(verbose)
+    {
+        std::cout<<"Q: "<<m_Q<<std::endl
+                 <<"batchSize: "<<batchSize<<std::endl
+                 <<"M: "<<M<<std::endl
+                 <<"C: "<<m_C<<std::endl;
+    }
     
     //m_K的初始化
     if(m_K.empty())
@@ -170,23 +197,26 @@ void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating)
         m_F = m_F + m_K.inv(1) * H.t() * (batchTarget - H*m_F);
 
         //输出信息
-        int ratio = (i+batchSize)/(float)m_Q*100;
-        if( ratio - trainedRatio >= 1)
+        if(verbose)
         {
-            trainedRatio = ratio;
-            
-            //输出训练进度
-            std::cout<<"Trained "<<trainedRatio<<"%"<<
-                       "----------------------------------------"<<std::endl;
-            
-            //计算在该批次训练数据上的准确率
-            cv::Mat output = H * m_F;
-            float score = calcScore(output,batchTarget);
-            std::cout<<"Score on batch training data:"<<score<<std::endl;
-            
-            //计算在测试数据上的准确率
-            if(validating && m_testImgs.size()>0)
-                validate();
+            int ratio = (i+batchSize)/(float)m_Q*100;
+            if( ratio - trainedRatio >= 1)
+            {
+                trainedRatio = ratio;
+                
+                //输出训练进度
+                std::cout<<"Trained "<<trainedRatio<<"%"<<
+                           "----------------------------------------"<<std::endl;
+                
+                //计算在该批次训练数据上的准确率
+                cv::Mat output = H * m_F;
+                float score = calcScore(output,batchTarget);
+                std::cout<<"Score on batch training data:"<<score<<std::endl;
+                
+                //计算在测试数据上的准确率
+                if(validating && m_testImgs.size()>0)
+                    validate();
+            }
         }
     }
 /*std::cout<<"T:"<<T.size<<"\n"<<T<<std::endl;
@@ -334,6 +364,16 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, std::string &label)
     label.assign(m_label_string[maxId]);
 }
 
+void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, std::string &label)
+{
+    cv::Mat gray,lbp;
+    if(mat.channels() == 3)
+        cv::cvtColor(mat,gray,cv::COLOR_BGR2GRAY);
+    LBP81(gray,lbp);
+    
+    query(lbp,label);
+}
+
 void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string> &labels)
 {
     if(m_F.empty())
@@ -367,19 +407,34 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
         labels[i].assign(m_label_string[ids[i]]);
 }
 
+void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::vector<std::string> &labels)
+{
+    cv::Mat gray,lbp;
+    if(mat.channels() == 3)
+        cv::cvtColor(mat,gray,cv::COLOR_BGR2GRAY);
+    LBP81(gray,lbp);
+    
+    query(lbp,n,labels);
+}
+
 void ELM_IN_ELM_Model::clearTrainData()
 {
     if(m_trainImgs.empty())
         return;
     
+    
     m_subModelToTrain.clearTrainData();
-    for(int i=0;i<m_n_models;i++)
+    for(int i=0;i<m_subModels.size();i++)
         m_subModels[i].clearTrainData();
     
-    m_trainImgs.clear();
-    m_trainLabelBins.clear();
-    m_testImgs.clear();
-    m_testLabelBins.clear();
+    if(!m_trainImgs.empty())
+        m_trainImgs.clear();
+    if(!m_trainLabelBins.empty())
+        m_trainLabelBins.clear();
+    if(!m_testImgs.empty())
+        m_testImgs.clear();
+    if(!m_testLabelBins.empty())
+        m_testLabelBins.clear();
 }
 
 void ELM_IN_ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
@@ -396,6 +451,15 @@ void ELM_IN_ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
     m_trainLabelBins.push_back(labelBin);
     m_Q = 1;
     
-    fitSubModels();
-    fitMainModel();
+    fitSubModels(-1,false,false);
+    fitMainModel(-1,false,false);
+}
+
+void ELM_IN_ELM_Model::trainNewFace(const cv::Mat &img, const std::string label)
+{
+    cv::Mat gray,lbp;
+    if(img.channels() == 3)
+        cv::cvtColor(img,gray,cv::COLOR_BGR2GRAY);
+    LBP81(gray,lbp);
+    trainNewImg(lbp,label);
 }

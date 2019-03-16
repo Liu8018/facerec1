@@ -17,20 +17,26 @@ public:
                              const int resizeWidth, const int resizeHeight, 
                              const int channels, bool shuffle=true);
     
+    void loadStandardFaceDataset(const std::string path, const float trainSampleRatio,
+                                 const int resizeWidth, const int resizeHeight, bool shuffle=true);
+    
     void loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle=true);
     
-    void fitSubModels(int batchSize = -1, bool validating = true);
-    void fitMainModel(int batchSize = -1, bool validating = true);
+    void fitSubModels(int batchSize = -1, bool validating = true, bool verbose = true);
+    void fitMainModel(int batchSize = -1, bool validating = true, bool verbose = true);
     
     void trainNewImg(const cv::Mat &img, const std::string label);
+    void trainNewFace(const cv::Mat &img, const std::string label);
     
     void save();
     void load(std::string modelDir);
     
     void query(const cv::Mat &mat, std::string &label);
+    void queryFace(const cv::Mat &mat, std::string &label);
     
     //得到前n个最大值ID
     void query(const cv::Mat &mat, int n, std::vector<std::string> &labels);
+    void queryFace(const cv::Mat &mat, int n, std::vector<std::string> &labels);
     
     void clearTrainData();
     

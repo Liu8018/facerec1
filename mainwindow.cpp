@@ -22,9 +22,27 @@ MainWindow::MainWindow(QWidget *parent) :
     SimdDetection::Size frameSize(m_capture.get(3),m_capture.get(4));
     m_detection.Init(frameSize, 1.2, frameSize / 5);
     
+    m_isDoFaceRec = false;
+    m_faceRecKeepTime = 5;
+    
+    //将timer与getframe连接
+    connect(m_timer,SIGNAL(timeout()),this,SLOT(updateFrame()));
+    m_timer->setInterval(1000/m_capture.get(cv::CAP_PROP_FPS));
+    m_timer->start();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+    delete m_timer;
+}
+
+void MainWindow::setMethod(std::string method)
+{
     //初始化：人脸识别
     //m_rec = FaceRecognition("resnet");
-    m_rec = FaceRecognition("elm");
+    //m_rec = FaceRecognition("elm");
+    m_rec = FaceRecognition(method);
     
     if(m_rec.method == "resnet")
     {
@@ -43,20 +61,6 @@ MainWindow::MainWindow(QWidget *parent) :
         else
             m_rec.init_loadEIEdb();
     }
-    
-    m_isDoFaceRec = false;
-    m_faceRecKeepTime = 5;
-    
-    //将timer与getframe连接
-    connect(m_timer,SIGNAL(timeout()),this,SLOT(updateFrame()));
-    m_timer->setInterval(1000/m_capture.get(cv::CAP_PROP_FPS));
-    m_timer->start();
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
-    delete m_timer;
 }
 
 void MainWindow::updateFrame()
@@ -99,6 +103,7 @@ void MainWindow::updateFrame()
                 //人脸对齐
                 cv::Mat alignedFaceROI;
                 m_alignment.alignFace(m_frameSrc,objects[0].rect,alignedFaceROI);
+                alignedFaceROI.copyTo(m_faceROI);
                 
                 //人脸识别
                 int n = 2;

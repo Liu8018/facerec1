@@ -94,7 +94,7 @@ void ELM_Model::setRandomState(int randomState)
     m_randomState = randomState;
 }
 
-void ELM_Model::fit(int batchSize, bool validating)
+void ELM_Model::fit(int batchSize, bool validating, bool verbose)
 {
     if(m_inputLayerData.empty())
         return;
@@ -108,11 +108,14 @@ void ELM_Model::fit(int batchSize, bool validating)
         batchSize = m_Q;
     
     //输出信息
-    std::cout<<"Q:"<<m_Q<<std::endl;
-    std::cout<<"batchSize:"<<batchSize<<std::endl;
-    std::cout<<"I:"<<m_I<<std::endl;
-    std::cout<<"H:"<<m_H<<std::endl;
-    std::cout<<"O:"<<m_O<<std::endl;
+    if(verbose)
+    {
+        std::cout<<"Q:"<<m_Q<<std::endl;
+        std::cout<<"batchSize:"<<batchSize<<std::endl;
+        std::cout<<"I:"<<m_I<<std::endl;
+        std::cout<<"H:"<<m_H<<std::endl;
+        std::cout<<"O:"<<m_O<<std::endl;
+    }
     
     //初次训练的初始化
     if(m_W_IH.empty())
@@ -162,23 +165,26 @@ void ELM_Model::fit(int batchSize, bool validating)
         m_W_HO = m_W_HO + m_K.inv(1) * m_H_output.t() * (targetBatchROI - m_H_output*m_W_HO);
         
         //输出信息
-        int ratio = (i+batchSize)/(float)m_Q*100;
-        if( ratio - trainedRatio >= 1)
+        if(verbose)
         {
-            trainedRatio = ratio;
-            
-            //输出训练进度
-            std::cout<<"Trained "<<trainedRatio<<"%"<<
-                       "----------------------------------------"<<std::endl;
-            
-            //计算并输出在该批次训练数据上的准确率
-            cv::Mat output = m_H_output * m_W_HO;
-            float score = calcScore(output,targetBatchROI);
-            std::cout<<"Score on batch training data:"<<score<<std::endl;
-            
-            //计算在测试数据上的准确率
-            if(validating)
-                validate();
+            int ratio = (i+batchSize)/(float)m_Q*100;
+            if( ratio - trainedRatio >= 1)
+            {
+                trainedRatio = ratio;
+                
+                //输出训练进度
+                std::cout<<"Trained "<<trainedRatio<<"%"<<
+                           "----------------------------------------"<<std::endl;
+                
+                //计算并输出在该批次训练数据上的准确率
+                cv::Mat output = m_H_output * m_W_HO;
+                float score = calcScore(output,targetBatchROI);
+                std::cout<<"Score on batch training data:"<<score<<std::endl;
+                
+                //计算在测试数据上的准确率
+                if(validating)
+                    validate();
+            }
         }
     }
     
@@ -337,6 +343,9 @@ void ELM_Model::loadStandardDataset(const std::string datasetPath, const float t
 
 void ELM_Model::clearTrainData()
 {
+    if(m_inputLayerData.empty())
+        return;
+    
     if(!m_inputLayerData.empty())
         m_inputLayerData.release();
     if(!m_H_output.empty())

@@ -1,6 +1,39 @@
 #include "ELM_functions.h"
 #include <sys/stat.h>
 
+void LBP81(const cv::Mat& src, cv::Mat& dst)
+{
+    dst = cv::Mat::zeros(src.rows-2, src.cols-2, CV_8U);
+    for(int i=1;i<src.rows-1;i++) 
+	{
+        for(int j=1;j<src.cols-1;j++) 
+		{
+			uchar center = src.at<uchar>(i,j);
+			unsigned char code=0,U2 = 0;
+			unsigned char a[8];
+			a[7]=(src.at<uchar>(i-1,j-1) > center);a[6]=(src.at<uchar>(i-1,j) > center);
+			a[5]=(src.at<uchar>(i-1,j+1) > center);a[4]=(src.at<uchar>(i,j+1) > center);
+			a[3]=(src.at<uchar>(i+1,j+1) > center);a[2]=(src.at<uchar>(i+1,j) > center);
+			a[1]=(src.at<uchar>(i+1,j-1) > center);a[0]=(src.at<uchar>(i,j-1) > center);
+			code |= a[7]<< 7;
+			code |= a[6]<< 6;
+			code |= a[5]<< 5;
+			code |= a[4]<< 4;
+			code |= a[3]<< 3;
+			code |= a[2]<< 2;
+			code |= a[1]<< 1;
+			code |= a[0]<< 0;
+	    //Uniform LBP
+            U2=abs(a[7]-a[0]);
+		for(int p=1;p<8;p++)
+			U2+=abs(a[p]-a[p-1]);
+		if(U2>2)
+			code=9;
+	    dst.at<unsigned char>(i-1,j-1) = code;
+		}
+	}
+}
+
 //加载图像
 void inputImgsFrom(const std::string datasetPath, 
                    std::vector<std::string> &label_string, 

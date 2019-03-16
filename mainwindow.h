@@ -19,6 +19,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     
+    void setMethod(std::string method);
+    
 private:
     Ui::MainWindow *ui;
     

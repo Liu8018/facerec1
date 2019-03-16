@@ -11,6 +11,9 @@
 #include <dirent.h>
 #include <algorithm>
 
+//提取LBP特征
+void LBP81(const cv::Mat& src, cv::Mat& dst);
+
 //加载图像
 void inputImgsFrom(const std::string datasetPath, 
                    std::vector<std::string> &label_string,
