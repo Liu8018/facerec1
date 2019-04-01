@@ -411,6 +411,10 @@ void getAverageImg(const std::vector<cv::Mat> &imgs, cv::Mat &averageImg)
     }
     
     averageImg.convertTo(averageImg,CV_8U);
+    
+    //cv::namedWindow("averageFace",0);
+    //cv::imshow("averageFace",averageImg);
+    //cv::waitKey();
 }
 
 void minusAverage(const cv::Mat &averageImg, std::vector<cv::Mat> &imgs)

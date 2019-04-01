@@ -168,6 +168,7 @@ void handleFaceDb()
     //人脸对齐初始化
     FaceAlignment alignment;
     
+    //对库中图像进行人脸检测并裁剪、对齐
     for(int i=0;i<trainImgs.size();i++)
     {
         cv::Size srcSize = trainImgs[i].size();
@@ -191,6 +192,7 @@ void handleFaceDb()
         cv::cvtColor(resultImg,trainImgs[i],cv::COLOR_BGR2GRAY);
     }
     
+    //训练elm-in-elm模型
     ELM_IN_ELM_Model eieModel;
     int nModels = 10;
     eieModel.setInitPara(nModels,eieModelPath);
@@ -200,6 +202,11 @@ void handleFaceDb()
     eieModel.fitSubModels();
     eieModel.fitMainModel();
     eieModel.save();
+    
+    //重新用resnet模型提取特征库
+    std::cout<<"updating resnet"<<std::endl;
+    std::map<dlib::matrix<float,0,1>, std::string> faceDescriptorsLib;
+    updatedb(faceDescriptorsLib);
     
     /*
     ELM_IN_ELM_Model eieModel;
@@ -249,9 +256,4 @@ void handleFaceDb()
         eieModel.trainNewFace(resultImg,it->second);
     }
     */
-    
-    //重新用resnet模型提取特征库
-    std::cout<<"updating resnet"<<std::endl;
-    std::map<dlib::matrix<float,0,1>, std::string> faceDescriptorsLib;
-    updatedb(faceDescriptorsLib);
 }
