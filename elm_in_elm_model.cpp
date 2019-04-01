@@ -64,6 +64,56 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
     inputImgsFrom(path,m_label_string,m_trainImgs,
                   m_testImgs,m_trainLabelBins,m_testLabelBins,
                   trainSampleRatio,m_channels,shuffle);
+    
+    for(int i=0;i<m_trainImgs.size();i++)
+        cv::resize(m_trainImgs[i],m_trainImgs[i],cv::Size(m_width,m_height));
+    for(int i=0;i<m_testImgs.size();i++)
+        cv::resize(m_testImgs[i],m_testImgs[i],cv::Size(m_width,m_height));
+    
+    getAverageImg(m_trainImgs,m_averageFace);
+    minusAverage(m_averageFace,m_trainImgs);
+    minusAverage(m_averageFace,m_testImgs);
+    
+    m_C = m_label_string.size();
+    m_Q = m_trainImgs.size();
+    
+    //提取输入图像的lbp特征
+    for(int i=0;i<m_trainImgs.size();i++)
+    {
+        cv::Mat lbp;
+        LBP81(m_trainImgs[i],lbp);
+        lbp.copyTo(m_trainImgs[i]);
+    }
+    for(int i=0;i<m_testImgs.size();i++)
+    {
+        cv::Mat lbp;
+        LBP81(m_testImgs[i],lbp);
+        lbp.copyTo(m_testImgs[i]);
+    }
+}
+
+void ELM_IN_ELM_Model::loadFaces(const std::vector<cv::Mat> &faceImgs,
+                                 const std::vector<std::string> &label_string,
+                                 const std::vector<std::vector<bool>> trainLabelBins,
+                                 const int resizeWidth, const int resizeHeight)
+{
+    m_width = resizeWidth;
+    m_height = resizeHeight;
+    m_channels = 1;
+    
+    m_trainImgs.assign(faceImgs.begin(),faceImgs.end());
+    m_label_string.assign(label_string.begin(),label_string.end());
+    m_trainLabelBins.assign(trainLabelBins.begin(),trainLabelBins.end());
+    
+    for(int i=0;i<m_trainImgs.size();i++)
+        cv::resize(m_trainImgs[i],m_trainImgs[i],cv::Size(m_width,m_height));
+    for(int i=0;i<m_testImgs.size();i++)
+        cv::resize(m_testImgs[i],m_testImgs[i],cv::Size(m_width,m_height));
+    
+    getAverageImg(m_trainImgs,m_averageFace);
+    minusAverage(m_averageFace,m_trainImgs);
+    minusAverage(m_averageFace,m_testImgs);
+    
     m_C = m_label_string.size();
     m_Q = m_trainImgs.size();
     
@@ -308,6 +358,7 @@ void ELM_IN_ELM_Model::save()
     fswrite<<"C"<<m_C;
     fswrite<<"F"<<m_F;
     fswrite<<"label_string"<<m_label_string;
+    fswrite<<"averageFace"<<m_averageFace;
     
     fswrite.release();
     
@@ -332,6 +383,7 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
     fsread["C"]>>m_C;
     fsread["F"]>>m_F;
     fsread["label_string"]>>m_label_string;
+    fsread["averageFace"]>>m_averageFace;
 
     fsread.release();
     
@@ -369,6 +421,10 @@ void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, std::string &label)
     cv::Mat gray,lbp;
     if(mat.channels() == 3)
         cv::cvtColor(mat,gray,cv::COLOR_BGR2GRAY);
+    
+    cv::resize(gray,gray,cv::Size(m_width,m_height));
+    minusAverage(m_averageFace,gray);
+    
     LBP81(gray,lbp);
     
     query(lbp,label);
@@ -412,6 +468,10 @@ void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::vector<std::str
     cv::Mat gray,lbp;
     if(mat.channels() == 3)
         cv::cvtColor(mat,gray,cv::COLOR_BGR2GRAY);
+    
+    cv::resize(gray,gray,cv::Size(m_width,m_height));
+    minusAverage(m_averageFace,gray);
+    
     LBP81(gray,lbp);
     
     query(lbp,n,labels);
@@ -460,6 +520,10 @@ void ELM_IN_ELM_Model::trainNewFace(const cv::Mat &img, const std::string label)
     cv::Mat gray,lbp;
     if(img.channels() == 3)
         cv::cvtColor(img,gray,cv::COLOR_BGR2GRAY);
+    
+    cv::resize(gray,gray,cv::Size(m_width,m_height));
+    minusAverage(m_averageFace,gray);
+    
     LBP81(gray,lbp);
     trainNewImg(lbp,label);
 }

@@ -394,3 +394,32 @@ void randomGenerate(cv::Mat &mat, cv::Size size, int randomState)
         for(int j=0;j<mat.cols;j++)
             mat.at<float>(i,j) = rng.uniform(-1.0,1.0);
 }
+
+void getAverageImg(const std::vector<cv::Mat> &imgs, cv::Mat &averageImg)
+{
+    if(imgs.empty())
+        return;
+    
+    averageImg = cv::Mat::zeros(imgs[0].size(),CV_32F);
+    cv::Mat tmpImg;
+    
+    for(int i=0;i<imgs.size();i++)
+    {
+        imgs[i].convertTo(tmpImg,CV_32F);
+        tmpImg = tmpImg/imgs.size();
+        averageImg += tmpImg;
+    }
+    
+    averageImg.convertTo(averageImg,CV_8U);
+}
+
+void minusAverage(const cv::Mat &averageImg, std::vector<cv::Mat> &imgs)
+{
+    for(int i=0;i<imgs.size();i++)
+        imgs[i] = imgs[i]/2 + 127 - averageImg/2;
+}
+
+void minusAverage(const cv::Mat &averageImg, cv::Mat &img)
+{
+    img = img/2 + 127 - averageImg/2;
+}
