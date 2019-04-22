@@ -27,6 +27,20 @@ void FaceAlignment::getShape(const cv::Mat &inputImg, const cv::Rect &faceRect, 
     shape = m_shapePredictor(cimg,face_dlibRect);
 }
 
+void FaceAlignment::drawShape(cv::Mat &img, dlib::full_object_detection shape)
+{
+    //shape转化为landmarks
+    std::vector<cv::Point> landmarks;
+    dlibPoint2cvPoint(shape,landmarks);
+    
+    //test:在两眼之间画线
+    for(int i=0;i<landmarks.size();i++)
+    {
+        cv::circle(img,landmarks[i],3,cv::Scalar(0,255,0),-1);
+        cv::putText(img,std::to_string(i),landmarks[i],1,0.8,cv::Scalar(255,0,0));
+    }
+}
+
 void FaceAlignment::alignFace(const cv::Mat &inputImg, const cv::Rect &faceRect, cv::Mat &resultImg)
 {
     dlib::full_object_detection shape;
