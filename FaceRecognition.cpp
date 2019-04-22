@@ -74,8 +74,9 @@ void FaceRecognition::init_updateEIEdb()
 
 void FaceRecognition::updateEIEdb(const cv::Mat &img, const std::string label)
 {
-    m_eieModel.trainNewFace(img,label);
-    m_eieModel.save();
+    //m_eieModel.trainNewFace(img,label);
+    //m_eieModel.save();
+    init_updateEIEdb();
 }
 
 void FaceRecognition::init_loadEIEdb()

@@ -51,8 +51,6 @@ public:
     void init_greedyFitWhole(int g);
     
 private:
-    cv::Mat m_averageFace;
-    
     int m_n_models;
     std::vector<int> m_subModelHiddenNodes;
     

@@ -70,13 +70,16 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
     for(int i=0;i<m_testImgs.size();i++)
         cv::resize(m_testImgs[i],m_testImgs[i],cv::Size(m_width,m_height));
     
+    /*
     getAverageImg(m_trainImgs,m_averageFace);
     minusAverage(m_averageFace,m_trainImgs);
     minusAverage(m_averageFace,m_testImgs);
+    */
     
     m_C = m_label_string.size();
     m_Q = m_trainImgs.size();
     
+    /*
     //提取输入图像的lbp特征
     for(int i=0;i<m_trainImgs.size();i++)
     {
@@ -90,6 +93,7 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
         LBP81(m_testImgs[i],lbp);
         lbp.copyTo(m_testImgs[i]);
     }
+    */
 }
 
 void ELM_IN_ELM_Model::loadFaces(const std::vector<cv::Mat> &faceImgs,
@@ -110,13 +114,16 @@ void ELM_IN_ELM_Model::loadFaces(const std::vector<cv::Mat> &faceImgs,
     for(int i=0;i<m_testImgs.size();i++)
         cv::resize(m_testImgs[i],m_testImgs[i],cv::Size(m_width,m_height));
     
+    /*
     getAverageImg(m_trainImgs,m_averageFace);
     minusAverage(m_averageFace,m_trainImgs);
     minusAverage(m_averageFace,m_testImgs);
+    */
     
     m_C = m_label_string.size();
     m_Q = m_trainImgs.size();
     
+    /*
     //提取输入图像的lbp特征
     for(int i=0;i<m_trainImgs.size();i++)
     {
@@ -130,6 +137,7 @@ void ELM_IN_ELM_Model::loadFaces(const std::vector<cv::Mat> &faceImgs,
         LBP81(m_testImgs[i],lbp);
         lbp.copyTo(m_testImgs[i]);
     }
+    */
 }
 
 void ELM_IN_ELM_Model::loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle)
@@ -220,6 +228,7 @@ void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating, bool verbose
         m_K.create(cv::Size(M*m_C,M*m_C),CV_32F);
         m_K = cv::Scalar(0);
     }
+    
     //m_F的初始化
     if(m_F.empty())
     {
@@ -358,7 +367,6 @@ void ELM_IN_ELM_Model::save()
     fswrite<<"C"<<m_C;
     fswrite<<"F"<<m_F;
     fswrite<<"label_string"<<m_label_string;
-    fswrite<<"averageFace"<<m_averageFace;
     
     fswrite.release();
     
@@ -383,7 +391,6 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
     fsread["C"]>>m_C;
     fsread["F"]>>m_F;
     fsread["label_string"]>>m_label_string;
-    fsread["averageFace"]>>m_averageFace;
 
     fsread.release();
     
@@ -418,16 +425,13 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, std::string &label)
 
 void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, std::string &label)
 {
-    cv::Mat gray,lbp;
+    cv::Mat gray;//,lbp;
     if(mat.channels() == 3)
         cv::cvtColor(mat,gray,cv::COLOR_BGR2GRAY);
     
     cv::resize(gray,gray,cv::Size(m_width,m_height));
-    minusAverage(m_averageFace,gray);
     
-    LBP81(gray,lbp);
-    
-    query(lbp,label);
+    query(gray,label);
 }
 
 void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string> &labels)
@@ -465,16 +469,13 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
 
 void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::vector<std::string> &labels)
 {
-    cv::Mat gray,lbp;
+    cv::Mat gray;//,lbp;
     if(mat.channels() == 3)
         cv::cvtColor(mat,gray,cv::COLOR_BGR2GRAY);
     
     cv::resize(gray,gray,cv::Size(m_width,m_height));
-    minusAverage(m_averageFace,gray);
     
-    LBP81(gray,lbp);
-    
-    query(lbp,n,labels);
+    query(gray,n,labels);
 }
 
 void ELM_IN_ELM_Model::clearTrainData()
@@ -517,13 +518,13 @@ void ELM_IN_ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
 
 void ELM_IN_ELM_Model::trainNewFace(const cv::Mat &img, const std::string label)
 {
-    cv::Mat gray,lbp;
+    cv::Mat gray;//,lbp;
     if(img.channels() == 3)
         cv::cvtColor(img,gray,cv::COLOR_BGR2GRAY);
+    else
+        img.copyTo(gray);
     
     cv::resize(gray,gray,cv::Size(m_width,m_height));
-    minusAverage(m_averageFace,gray);
     
-    LBP81(gray,lbp);
-    trainNewImg(lbp,label);
+    trainNewImg(gray,label);
 }

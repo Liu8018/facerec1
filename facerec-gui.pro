@@ -32,7 +32,8 @@ SOURCES += \
     SignUpDialog.cpp \
     ELM_functions.cpp \
     elm_in_elm_model.cpp \
-    elm_model.cpp
+    elm_model.cpp \
+    pca.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -43,7 +44,8 @@ HEADERS += \
     SignUpDialog.h \
     ELM_functions.h \
     elm_in_elm_model.h \
-    elm_model.h
+    elm_model.h \
+    pca.h
 
 FORMS += \
         mainwindow.ui \
