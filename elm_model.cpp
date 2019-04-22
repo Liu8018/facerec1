@@ -42,7 +42,9 @@ void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::
     m_inputLayerData.create(cv::Size(m_I,m_Q),CV_32F);
     for(int i=0;i<mats.size();i++)
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
-    mats2lines(mats,m_inputLayerData,m_channels);
+    //mats2lines(mats,m_inputLayerData,m_channels);
+    m_pcaFace.calc(mats);
+    m_pcaFace.reduceDim(mats,m_inputLayerData);
     normalize_img(m_inputLayerData);
     
 //std::cout<<"m_Target:\n"<<m_Target<<std::endl;
@@ -62,7 +64,9 @@ void ELM_Model::inputData_2d_test(std::vector<cv::Mat> &mats, const std::vector<
     m_inputLayerData_test.create(cv::Size(m_I,m_Q_test),CV_32F);
     for(int i=0;i<mats.size();i++)
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
-    mats2lines(mats,m_inputLayerData_test,m_channels);
+    //mats2lines(mats,m_inputLayerData_test,m_channels);
+    m_pcaFace.calc(mats);
+    m_pcaFace.reduceDim(mats,m_inputLayerData_test);
     normalize_img(m_inputLayerData_test);
 }
 
@@ -288,6 +292,7 @@ void ELM_Model::save(std::string path, std::string K_path)
     fswrite<<"B_H"<<m_B_H;
     fswrite<<"activationMethod"<<m_activationMethod;
     fswrite<<"label_string"<<m_label_string;
+    m_pcaFace.write("./data/pca/pcaFace.xml");
     
     if(K_path != "")
     {
@@ -312,6 +317,7 @@ void ELM_Model::load(std::string path, std::string K_path)
     fsread["B_H"]>>m_B_H;
     fsread["activationMethod"]>>m_activationMethod;
     fsread["label_string"]>>m_label_string;
+    m_pcaFace.read("./data/pca/pcaFace.xml");
     
     if(K_path != "")
     {

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <ctime>
 #include "ELM_functions.h"
+#include "pca.h"
 
 class ELM_Model
 {
@@ -50,6 +51,8 @@ public:
     float validate();
     
 private:
+    PCA_Face m_pcaFace;
+    
     int m_randomState;
     
     int m_I;  //输入层节点数

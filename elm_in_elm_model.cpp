@@ -67,6 +67,9 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
     m_C = m_label_string.size();
     m_Q = m_trainImgs.size();
     
+    
+    
+    /*
     //提取输入图像的lbp特征
     for(int i=0;i<m_trainImgs.size();i++)
     {
@@ -80,6 +83,7 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
         LBP81(m_testImgs[i],lbp);
         lbp.copyTo(m_testImgs[i]);
     }
+    */
 }
 
 void ELM_IN_ELM_Model::loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle)
