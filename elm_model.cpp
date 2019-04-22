@@ -36,8 +36,7 @@ void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::
     
     //转化label为target
     label2target(labels,m_Target);
-    std::cout<<"width:"<<m_width<<" height:"<<m_height<<std::endl;
-    m_inputLayerData.create(cv::Size(m_I,m_Q),CV_32F);
+    //m_inputLayerData.create(cv::Size(m_I,m_Q),CV_32F);
     for(int i=0;i<mats.size();i++)
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
     //mats2lines(mats,m_inputLayerData,m_channels);
@@ -62,11 +61,10 @@ void ELM_Model::inputData_2d_test(std::vector<cv::Mat> &mats, const std::vector<
     
     label2target(labels,m_Target_test);
     
-    m_inputLayerData_test.create(cv::Size(m_I,m_Q_test),CV_32F);
+    //m_inputLayerData_test.create(cv::Size(m_I,m_Q_test),CV_32F);
     for(int i=0;i<mats.size();i++)
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
     //mats2lines(mats,m_inputLayerData_test,m_channels);
-    m_pcaFace.calc(mats);
     m_pcaFace.reduceDim(mats,m_inputLayerData_test);
     normalize_img(m_inputLayerData_test);
 }
@@ -246,10 +244,13 @@ void ELM_Model::query(const cv::Mat &mat, std::string &label)
 void ELM_Model::query(const cv::Mat &mat, cv::Mat &output)
 {
     //转化为一维数据
-    cv::Mat inputLine(cv::Size(m_width*m_channels*m_height,1),CV_32F);
+    cv::Mat inputLine;//(cv::Size(m_width*m_channels*m_height,1),CV_32F);
     cv::Mat tmpImg;
     cv::resize(mat,tmpImg,cv::Size(m_width,m_height));
-    mat2line(tmpImg,inputLine,m_channels);
+    //mat2line(tmpImg,inputLine,m_channels);
+    std::vector<cv::Mat> mats;
+    mats.push_back(mat);
+    m_pcaFace.reduceDim(mats,inputLine);
     normalize_img(inputLine);
     
     //乘权重，加偏置，激活
@@ -266,8 +267,8 @@ void ELM_Model::batchQuery(std::vector<cv::Mat> &inputMats, cv::Mat &outputMat)
     for(int i=0;i<inputMats.size();i++)
         cv::resize(inputMats[i],inputMats[i],cv::Size(m_width,m_height));
     
-    cv::Mat inputLayerData(cv::Size(m_width*m_height*m_channels,inputMats.size()),CV_32F);
-    mats2lines(inputMats,inputLayerData,m_channels);
+    cv::Mat inputLayerData;//(cv::Size(m_width*m_height*m_channels,inputMats.size()),CV_32F);
+    m_pcaFace.reduceDim(inputMats,inputLayerData);
     normalize_img(inputLayerData);
 
     cv::Mat H = inputLayerData * m_W_IH;

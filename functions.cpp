@@ -209,8 +209,6 @@ void handleFaceDb()
     updatedb(faceDescriptorsLib);
     
     /*
-    std::string faceDbPath = "./data/face_database";    
-    std::string eieModelPath = "./data/ELM_Models";
     ELM_IN_ELM_Model eieModel;
     int nModels = 10;
     eieModel.setInitPara(nModels,eieModelPath);
@@ -226,6 +224,7 @@ void handleFaceDb()
     FaceAlignment alignment;
     
     //对库中图像进行人脸检测并裁剪、对齐,再用来训练elm-in-elm模型
+    std::cout<<"updating elm"<<std::endl;
     std::map<std::string, std::string> files;
     getFiles2(faceDbPath,files);
     for(std::map<std::string, std::string>::iterator it = files.begin(); it != files.end(); it++)
@@ -256,9 +255,5 @@ void handleFaceDb()
         //训练
         eieModel.trainNewFace(resultImg,it->second);
     }
-    
-    //重新用resnet模型提取特征库
-    std::map<dlib::matrix<float,0,1>, std::string> faceDescriptorsLib;
-    updatedb(faceDescriptorsLib);
     */
 }

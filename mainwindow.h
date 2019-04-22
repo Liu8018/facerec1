@@ -20,10 +20,12 @@ public:
     ~MainWindow();
     
     void setMethod(std::string method);
+    void setVideo(std::string video);
     
 private:
     Ui::MainWindow *ui;
     
+    std::string m_video;
     cv::VideoCapture m_capture;
     cv::Mat m_frame;
     cv::Mat m_frameSrc;

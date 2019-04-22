@@ -62,3 +62,10 @@ void getMaxNId(const cv::Mat &line, int n, std::vector<int> &ids);
 
 //计分
 float calcScore(const cv::Mat &outputData, const cv::Mat &target);
+
+//计算图像的平均值
+void getAverageImg(const std::vector<cv::Mat> &imgs, cv::Mat &averageImg);
+
+//图像与平均值做差
+void minusAverage(const cv::Mat &averageImg, std::vector<cv::Mat> &imgs);
+void minusAverage(const cv::Mat &averageImg, cv::Mat &img);

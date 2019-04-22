@@ -64,10 +64,20 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
     inputImgsFrom(path,m_label_string,m_trainImgs,
                   m_testImgs,m_trainLabelBins,m_testLabelBins,
                   trainSampleRatio,m_channels,shuffle);
+    
+    for(int i=0;i<m_trainImgs.size();i++)
+        cv::resize(m_trainImgs[i],m_trainImgs[i],cv::Size(m_width,m_height));
+    for(int i=0;i<m_testImgs.size();i++)
+        cv::resize(m_testImgs[i],m_testImgs[i],cv::Size(m_width,m_height));
+    
+    /*
+    getAverageImg(m_trainImgs,m_averageFace);
+    minusAverage(m_averageFace,m_trainImgs);
+    minusAverage(m_averageFace,m_testImgs);
+    */
+    
     m_C = m_label_string.size();
     m_Q = m_trainImgs.size();
-    
-    
     
     /*
     //提取输入图像的lbp特征
@@ -103,6 +113,12 @@ void ELM_IN_ELM_Model::loadFaces(const std::vector<cv::Mat> &faceImgs,
         cv::resize(m_trainImgs[i],m_trainImgs[i],cv::Size(m_width,m_height));
     for(int i=0;i<m_testImgs.size();i++)
         cv::resize(m_testImgs[i],m_testImgs[i],cv::Size(m_width,m_height));
+    
+    /*
+    getAverageImg(m_trainImgs,m_averageFace);
+    minusAverage(m_averageFace,m_trainImgs);
+    minusAverage(m_averageFace,m_testImgs);
+    */
     
     m_C = m_label_string.size();
     m_Q = m_trainImgs.size();
@@ -212,6 +228,7 @@ void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating, bool verbose
         m_K.create(cv::Size(M*m_C,M*m_C),CV_32F);
         m_K = cv::Scalar(0);
     }
+    
     //m_F的初始化
     if(m_F.empty())
     {
@@ -408,12 +425,13 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, std::string &label)
 
 void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, std::string &label)
 {
-    cv::Mat gray,lbp;
+    cv::Mat gray;//,lbp;
     if(mat.channels() == 3)
         cv::cvtColor(mat,gray,cv::COLOR_BGR2GRAY);
-    LBP81(gray,lbp);
     
-    query(lbp,label);
+    cv::resize(gray,gray,cv::Size(m_width,m_height));
+    
+    query(gray,label);
 }
 
 void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string> &labels)
@@ -451,12 +469,13 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
 
 void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::vector<std::string> &labels)
 {
-    cv::Mat gray,lbp;
+    cv::Mat gray;//,lbp;
     if(mat.channels() == 3)
         cv::cvtColor(mat,gray,cv::COLOR_BGR2GRAY);
-    LBP81(gray,lbp);
     
-    query(lbp,n,labels);
+    cv::resize(gray,gray,cv::Size(m_width,m_height));
+    
+    query(gray,n,labels);
 }
 
 void ELM_IN_ELM_Model::clearTrainData()
@@ -499,9 +518,13 @@ void ELM_IN_ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
 
 void ELM_IN_ELM_Model::trainNewFace(const cv::Mat &img, const std::string label)
 {
-    cv::Mat gray,lbp;
+    cv::Mat gray;//,lbp;
     if(img.channels() == 3)
         cv::cvtColor(img,gray,cv::COLOR_BGR2GRAY);
-    LBP81(gray,lbp);
-    trainNewImg(lbp,label);
+    else
+        img.copyTo(gray);
+    
+    cv::resize(gray,gray,cv::Size(m_width,m_height));
+    
+    trainNewImg(gray,label);
 }

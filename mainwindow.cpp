@@ -7,13 +7,24 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+    delete m_timer;
+}
+
+void MainWindow::setVideo(std::string video)
+{
+    m_video = video;
     
     //初始化：摄像头
-    m_capture.open("/dev/video0");
+    m_capture.open(m_video);
     
     if (!m_capture.isOpened())
     {
-        std::cout << "Can't capture!" << std::endl;
+        std::cout << "Can't capture "<<m_video<< std::endl;
         exit(0);
     }
     
@@ -29,12 +40,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_timer,SIGNAL(timeout()),this,SLOT(updateFrame()));
     m_timer->setInterval(1000/m_capture.get(cv::CAP_PROP_FPS));
     m_timer->start();
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
-    delete m_timer;
 }
 
 void MainWindow::setMethod(std::string method)
@@ -93,6 +98,8 @@ void MainWindow::updateFrame()
                 //人脸对齐
                 dlib::full_object_detection shape;
                 m_alignment.getShape(m_frameSrc,objects[0].rect,shape);
+                
+                //m_alignment.drawShape(m_frame,shape);
                 
                 //人脸识别
                 isInFaceDb = m_rec.recognize(m_frameSrc,shape,name);

@@ -19,6 +19,8 @@ public:
     
     void alignFace(const cv::Mat &inputImg, const cv::Rect &faceRect, cv::Mat &resultImg);
     
+    void drawShape(cv::Mat &img, dlib::full_object_detection shape);
+    
 private:
     dlib::shape_predictor m_shapePredictor;
     
