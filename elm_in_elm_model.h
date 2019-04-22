@@ -20,6 +20,11 @@ public:
     void loadStandardFaceDataset(const std::string path, const float trainSampleRatio,
                                  const int resizeWidth, const int resizeHeight, bool shuffle=true);
     
+    void loadFaces(const std::vector<cv::Mat> &faceImgs,
+                 const std::vector<std::string> &label_string,
+                 const std::vector<std::vector<bool>> trainLabelBins,
+                 const int resizeWidth, const int resizeHeight);
+    
     void loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle=true);
     
     void fitSubModels(int batchSize = -1, bool validating = true, bool verbose = true);

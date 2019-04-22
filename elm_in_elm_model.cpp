@@ -86,6 +86,44 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
     */
 }
 
+void ELM_IN_ELM_Model::loadFaces(const std::vector<cv::Mat> &faceImgs,
+                                 const std::vector<std::string> &label_string,
+                                 const std::vector<std::vector<bool>> trainLabelBins,
+                                 const int resizeWidth, const int resizeHeight)
+{
+    m_width = resizeWidth;
+    m_height = resizeHeight;
+    m_channels = 1;
+    
+    m_trainImgs.assign(faceImgs.begin(),faceImgs.end());
+    m_label_string.assign(label_string.begin(),label_string.end());
+    m_trainLabelBins.assign(trainLabelBins.begin(),trainLabelBins.end());
+    
+    for(int i=0;i<m_trainImgs.size();i++)
+        cv::resize(m_trainImgs[i],m_trainImgs[i],cv::Size(m_width,m_height));
+    for(int i=0;i<m_testImgs.size();i++)
+        cv::resize(m_testImgs[i],m_testImgs[i],cv::Size(m_width,m_height));
+    
+    m_C = m_label_string.size();
+    m_Q = m_trainImgs.size();
+    
+    /*
+    //提取输入图像的lbp特征
+    for(int i=0;i<m_trainImgs.size();i++)
+    {
+        cv::Mat lbp;
+        LBP81(m_trainImgs[i],lbp);
+        lbp.copyTo(m_trainImgs[i]);
+    }
+    for(int i=0;i<m_testImgs.size();i++)
+    {
+        cv::Mat lbp;
+        LBP81(m_testImgs[i],lbp);
+        lbp.copyTo(m_testImgs[i]);
+    }
+    */
+}
+
 void ELM_IN_ELM_Model::loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle)
 {
     loadMnistData_csv(path,trainSampleRatio,

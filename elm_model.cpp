@@ -31,8 +31,6 @@ void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::
     
     //确定输入数据规模
     m_Q = mats.size();
-    //确定输入层节点数
-    m_I = m_width * m_height * m_channels;
     //确定输出层节点数
     m_O = labels[0].size();
     
@@ -46,6 +44,9 @@ void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::
     m_pcaFace.calc(mats);
     m_pcaFace.reduceDim(mats,m_inputLayerData);
     normalize_img(m_inputLayerData);
+    
+    //确定输入层节点数
+    m_I = m_inputLayerData.cols;
     
 //std::cout<<"m_Target:\n"<<m_Target<<std::endl;
 //std::cout<<"m_inputLayerData:\n"<<m_inputLayerData<<std::endl;
