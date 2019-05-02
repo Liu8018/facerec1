@@ -189,6 +189,9 @@ void handleFaceDb()
         cv::Mat resultImg;
         alignment.alignFace(trainImgs[i],faceRect,resultImg);
         
+        //cv::imshow("detect+alignment",resultImg);
+        //cv::waitKey();
+        
         cv::cvtColor(resultImg,trainImgs[i],cv::COLOR_BGR2GRAY);
     }
     
@@ -207,53 +210,4 @@ void handleFaceDb()
     std::cout<<"updating resnet"<<std::endl;
     std::map<dlib::matrix<float,0,1>, std::string> faceDescriptorsLib;
     updatedb(faceDescriptorsLib);
-    
-    /*
-    ELM_IN_ELM_Model eieModel;
-    int nModels = 10;
-    eieModel.setInitPara(nModels,eieModelPath);
-    eieModel.loadStandardFaceDataset(faceDbPath,1,50,50);
-    eieModel.clearTrainData();
-    for(int i=0;i<nModels;i++)
-        eieModel.setSubModelHiddenNodes(i,100);
-    
-    //人脸检测初始化
-    SimdDetection detection;
-    detection.Load("./data/cascade/haar_face_0.xml");
-    //人脸对齐初始化
-    FaceAlignment alignment;
-    
-    //对库中图像进行人脸检测并裁剪、对齐,再用来训练elm-in-elm模型
-    std::cout<<"updating elm"<<std::endl;
-    std::map<std::string, std::string> files;
-    getFiles2(faceDbPath,files);
-    for(std::map<std::string, std::string>::iterator it = files.begin(); it != files.end(); it++)
-    {
-        std::string fileName = it->first;
-        cv::Mat frame = cv::imread(fileName);
-        if(frame.empty())
-            continue;
-                
-        cv::Size srcSize = frame.size();
-        detection.Init(srcSize,1.2,srcSize/5);
-        SimdDetection::View image = frame;
-        SimdDetection::Objects objects;
-        detection.Detect(image, objects);
-        
-        cv::Rect faceRect;
-        if(objects.empty())
-            faceRect = cv::Rect(0,0,frame.cols,frame.rows);
-        else
-            faceRect = objects[0].rect;
-        
-        //对齐
-        dlib::full_object_detection shape;
-        alignment.getShape(frame,faceRect,shape);
-        cv::Mat resultImg;
-        alignment.alignFace(frame,faceRect,resultImg);
-        
-        //训练
-        eieModel.trainNewFace(resultImg,it->second);
-    }
-    */
 }
