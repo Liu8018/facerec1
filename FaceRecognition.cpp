@@ -55,12 +55,12 @@ void FaceRecognition::getDescriptor(const cv::Mat &src, const dlib::full_object_
     faceDescriptor = m_net(face_chip);
 }
 
-void FaceRecognition::init_updatedb()
+void FaceRecognition::init_updateResnetDb()
 {
-    updatedb(m_faceDescriptorsLib);
+    updateResnetDb(m_faceDescriptorsLib);
 }
 
-void FaceRecognition::init_loadDb()
+void FaceRecognition::init_loadResnetDb()
 {
     dlib::deserialize("./data/face_database/faceDescriptors.dat") >> m_faceDescriptorsLib;
 }

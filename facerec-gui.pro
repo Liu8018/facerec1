@@ -33,7 +33,8 @@ SOURCES += \
     ELM_functions.cpp \
     elm_in_elm_model.cpp \
     elm_model.cpp \
-    pca.cpp
+    pca.cpp \
+    FaceDetection.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -52,7 +53,7 @@ FORMS += \
     SignUpDialog.ui
 
 INCLUDEPATH += $$PWD/include
-LIBS += -L$$PWD/libs/ -lSimd -ldlib -lpthread -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs
+LIBS += -L$$PWD/libs/ -lfacedetection -ldlib -lpthread -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs
 
 RESOURCES += \
     resources.qrc

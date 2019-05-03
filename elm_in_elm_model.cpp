@@ -96,6 +96,7 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
     */
 }
 
+
 void ELM_IN_ELM_Model::loadFaces(const std::vector<cv::Mat> &faceImgs,
                                  const std::vector<std::string> &label_string,
                                  const std::vector<std::vector<bool>> trainLabelBins,
@@ -189,6 +190,8 @@ void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating, bool verbose
 
 void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating, bool verbose)
 {
+    std::cout<<"【elm-in-elm训练开始】--------------------------------------"<<std::endl;
+    
     if(m_trainImgs.empty())
         return;
     
@@ -263,10 +266,6 @@ void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating, bool verbose
             {
                 trainedRatio = ratio;
                 
-                //输出训练进度
-                std::cout<<"Trained "<<trainedRatio<<"%"<<
-                           "----------------------------------------"<<std::endl;
-                
                 //计算在该批次训练数据上的准确率
                 cv::Mat output = H * m_F;
                 float score = calcScore(output,batchTarget);
@@ -278,6 +277,9 @@ void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating, bool verbose
             }
         }
     }
+    
+    std::cout<<"【elm-in-elm训练结束】--------------------------------------"<<std::endl;
+    
 /*std::cout<<"T:"<<T.size<<"\n"<<T<<std::endl;
 std::cout<<"H:"<<H.size<<"\n"<<H<<std::endl;
 std::cout<<"F:"<<m_F.size<<"\n"<<m_F<<std::endl;

@@ -43,22 +43,13 @@ void FaceAlignment::drawShape(cv::Mat &img, dlib::full_object_detection shape)
 
 void FaceAlignment::alignFace(const cv::Mat &inputImg, const cv::Rect &faceRect, cv::Mat &resultImg)
 {
+    
     dlib::full_object_detection shape;
     getShape(inputImg,faceRect,shape);
     
     //shape转化为landmarks
     std::vector<cv::Point> landmarks;
     dlibPoint2cvPoint(shape,landmarks);
-    
-    //test
-    /*cv::Mat image = inputImg.clone();
-    cv::line(image,landmarks[45],landmarks[36],cv::Scalar(0,255,0),1);
-    for(int i=0;i<landmarks.size();i++)
-    {
-        cv::circle(image,landmarks[i],3,cv::Scalar(255,0,0));
-        cv::putText(image,std::to_string(i),landmarks[i],1,1,cv::Scalar(0,255,0));
-    }
-    cv::imshow("testImage",image);*/
     
     //根据两眼连线对齐人脸
     cv::Mat faceROI = inputImg(faceRect);
@@ -71,5 +62,17 @@ void FaceAlignment::alignFace(const cv::Mat &inputImg, const cv::Rect &faceRect,
     cv::Mat rotMat = cv::getRotationMatrix2D(center, angle, 1); 
     cv::warpAffine(faceROI, resultImg, rotMat, faceROI.size());
     
+    
+    //resultImg = inputImg(faceRect);
+    
     //cv::imshow("testResult",resultImg);
+    //test
+    /*cv::Mat image = inputImg.clone();
+    cv::line(image,landmarks[45],landmarks[36],cv::Scalar(0,255,0),1);
+    for(int i=0;i<landmarks.size();i++)
+    {
+        cv::circle(image,landmarks[i],3,cv::Scalar(255,0,0));
+        cv::putText(image,std::to_string(i),landmarks[i],1,1,cv::Scalar(0,255,0));
+    }
+    cv::imshow("testImage",image);*/
 }

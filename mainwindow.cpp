@@ -28,13 +28,8 @@ void MainWindow::setVideo(std::string video)
         exit(0);
     }
     
-    //初始化：检测器
-    m_detection.Load("./data/cascade/haar_face_0.xml");
-    SimdDetection::Size frameSize(m_capture.get(3),m_capture.get(4));
-    m_detection.Init(frameSize, 1.2, frameSize / 5);
-    
     m_isDoFaceRec = false;
-    m_faceRecKeepTime = 5;
+    m_faceRecKeepTime = 500;
     
     //将timer与getframe连接
     connect(m_timer,SIGNAL(timeout()),this,SLOT(updateFrame()));
@@ -53,9 +48,9 @@ void MainWindow::setMethod(std::string method)
     {
         //resnet人脸识别初始化
         if(access("./data/face_database/faceDescriptors.dat",F_OK) == -1)
-            m_rec.init_updatedb();
+            m_rec.init_updateResnetDb();
         else
-            m_rec.init_loadDb();
+            m_rec.init_loadResnetDb();
     }
     
     if(m_rec.method == "elm")
@@ -65,6 +60,11 @@ void MainWindow::setMethod(std::string method)
             m_rec.init_updateEIEdb();
         else
             m_rec.init_loadEIEdb();
+        
+        std::map<std::string, std::string> files;
+        getFiles("./data/face_database",files);
+        if(files.empty())
+            isEmptyRun = true;
     }
 }
 
@@ -74,19 +74,22 @@ void MainWindow::updateFrame()
     cv::flip(m_frameSrc,m_frameSrc,1);
     m_frameSrc.copyTo(m_frame);
     
-    //类型转化
-    SimdDetection::View image = m_frame;
-    
     //进行检测
-    SimdDetection::Objects objects;
-    m_detection.Detect(image, objects);
+    std::vector<cv::Rect> objects;
+    m_detection.detect(m_frame, objects);
+    
+    //debug
+    if(objects.empty())
+        objects.push_back(debugRect);
+    else
+        debugRect = objects[0];
     
     if(!objects.empty())
     {
-        m_faceROI = m_frameSrc(objects[0].rect);
+        m_faceROI = m_frameSrc(objects[0]);
         
         //绘制检测结果
-        Simd::DrawRectangle(image, objects[0].rect, Simd::Pixel::Bgr24(0, 255, 255),2);
+        cv::rectangle(m_frame,objects[0],cv::Scalar(0,255,255),2);
         
         if(m_isDoFaceRec)
         {
@@ -97,7 +100,7 @@ void MainWindow::updateFrame()
             {
                 //人脸对齐
                 dlib::full_object_detection shape;
-                m_alignment.getShape(m_frameSrc,objects[0].rect,shape);
+                m_alignment.getShape(m_frameSrc,objects[0],shape);
                 
                 //m_alignment.drawShape(m_frame,shape);
                 
@@ -109,7 +112,7 @@ void MainWindow::updateFrame()
             {
                 //人脸对齐
                 cv::Mat alignedFaceROI;
-                m_alignment.alignFace(m_frameSrc,objects[0].rect,alignedFaceROI);
+                m_alignment.alignFace(m_frameSrc,objects[0],alignedFaceROI);
                 alignedFaceROI.copyTo(m_faceROI);
                 
                 //人脸识别
@@ -128,9 +131,9 @@ void MainWindow::updateFrame()
             
             //显示识别结果
             if(isInFaceDb)
-                cv::putText(m_frame,name,objects[0].rect.TopLeft(),1,2,cv::Scalar(255,100,0),2);
+                cv::putText(m_frame,name,objects[0].tl(),1,2,cv::Scalar(255,100,0),2);
             else
-                cv::putText(m_frame,"others",objects[0].rect.TopLeft(),1,2,cv::Scalar(255,100,0),2);
+                cv::putText(m_frame,"others",objects[0].tl(),1,2,cv::Scalar(255,100,0),2);
             
             //到达持续时间，停止检测
             float keptTime = (cv::getTickCount()-m_faceRecStartTick)/cv::getTickFrequency();
@@ -205,7 +208,7 @@ void MainWindow::addFace(bool isSignUp, std::string name)
     //输出
     if(isNewClass)
     {
-        filename += name + ".jpg";
+        filename += name + ".png";
     }
     else
     {
@@ -213,15 +216,22 @@ void MainWindow::addFace(bool isSignUp, std::string name)
         char strTime[64];
         strftime(strTime, 64, "%Y-%m-%d-%H-%M-%S", localtime(&t));
         
-        filename += name+std::string(strTime) + ".jpg";
+        filename += name+std::string(strTime) + ".png";
     }
     
+    markImg(m_faceROI);
     cv::imwrite(filename,m_faceROI);
+    if(isEmptyRun)
+    {
+        filename = "./data/face_database/" + name + "/" + name + "2.png";
+        cv::imwrite(filename,m_faceROI);
+        isEmptyRun = false;
+    }
     
     //更新数据库
     if(m_rec.method == "resnet" && isNewClass)
     {
-        m_rec.init_updatedb();
+        m_rec.init_updateResnetDb();
     }
     if(m_rec.method == "elm")
     {

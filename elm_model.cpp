@@ -99,6 +99,8 @@ void ELM_Model::setRandomState(int randomState)
 
 void ELM_Model::fit(int batchSize, bool validating, bool verbose)
 {
+    std::cout<<"【elm训练开始】--------------------------------------"<<std::endl;
+    
     if(m_inputLayerData.empty())
         return;
     
@@ -175,10 +177,6 @@ void ELM_Model::fit(int batchSize, bool validating, bool verbose)
             {
                 trainedRatio = ratio;
                 
-                //输出训练进度
-                std::cout<<"Trained "<<trainedRatio<<"%"<<
-                           "----------------------------------------"<<std::endl;
-                
                 //计算并输出在该批次训练数据上的准确率
                 cv::Mat output = m_H_output * m_W_HO;
                 float score = calcScore(output,targetBatchROI);
@@ -190,6 +188,8 @@ void ELM_Model::fit(int batchSize, bool validating, bool verbose)
             }
         }
     }
+    
+    std::cout<<"【elm训练结束】--------------------------------------"<<std::endl;
     
 //std::cout<<"m_W_IH:\n"<<m_W_IH<<std::endl;
 //std::cout<<"m_B_H:\n"<<m_B_H<<std::endl;

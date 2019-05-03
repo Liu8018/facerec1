@@ -1,15 +1,25 @@
 #ifndef FACEDETECTOR_H
 #define FACEDETECTOR_H
 
-#include "opencv2/highgui.hpp"
+#include "facedetectcnn.h"
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 
-#ifndef SIMD_OPENCV_ENABLE
-#define SIMD_OPENCV_ENABLE
-#endif
+#define DETECT_BUFFER_SIZE 0x20000
 
-#include "Simd/SimdDetection.hpp"
-#include "Simd/SimdDrawing.hpp"
-
-typedef Simd::Detection<Simd::Allocator> SimdDetection;
+class FaceDetection
+{
+public:
+    FaceDetection();
+    
+    void detect(const cv::Mat &src, std::vector<cv::Rect> &faceRects);
+    
+private:
+    int * pResults;
+    unsigned char * pBuffer;
+    
+    int resizeWidth;
+    float resizeRatio;
+};
 
 #endif // FACEDETECTOR_H

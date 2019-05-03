@@ -30,12 +30,14 @@ private:
     cv::Mat m_frame;
     cv::Mat m_frameSrc;
     
-    SimdDetection m_detection;
+    FaceDetection m_detection;
     
     FaceAlignment m_alignment;
     
     FaceRecognition m_rec;
     cv::Mat m_faceROI;
+    
+    cv::Rect debugRect;
     
     QImage m_qimgFrame;
     QTimer *m_timer = new QTimer(this);
@@ -45,6 +47,8 @@ private:
     bool m_isDoFaceRec;
     float m_faceRecStartTick;
     float m_faceRecKeepTime; 
+    
+    bool isEmptyRun;
     
 private slots:
     void updateFrame();

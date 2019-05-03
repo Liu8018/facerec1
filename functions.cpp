@@ -31,8 +31,8 @@ void getFiles(std::string path, std::map<std::string, std::string> &files)
             className = className.substr(className.find_last_of("/")+1,className.length()-1);
             
             //只有文件名中带有人名(上级文件夹名)的图片，才会被加入
-            if(fn.find(className) == std::string::npos)
-                continue;
+            //if(fn.find(className) == std::string::npos)
+            //    continue;
             
 			std::string p = path + fn;
 			files.insert(std::pair<std::string, std::string>(p, className));
@@ -50,53 +50,7 @@ void getFiles(std::string path, std::map<std::string, std::string> &files)
 	return ;
 }
 
-void getFiles2(std::string path, std::map<std::string, std::string> &files)
-{
-	DIR *dir;
-	struct dirent *ptr;
-
-	if(path[path.length()-1] != '/')
-		path = path + "/";
-
-	if((dir = opendir(path.c_str())) == NULL)
-	{
-		std::cout<<"open the dir: "<< path <<" error!" <<std::endl;
-		return;
-	}
-	
-	while((ptr=readdir(dir)) !=NULL )
-	{
-		///current dir OR parrent dir 
-		if(strcmp(ptr->d_name,".")==0 || strcmp(ptr->d_name,"..")==0) 
-            continue; 
-		else if(ptr->d_type == 8) //file
-		{
-			std::string fn(ptr->d_name);
-            
-            if(fn.substr(fn.length()-3,fn.length()-1) == "dat")
-                continue;
-            
-            std::string className = path;
-            className.pop_back();
-            className = className.substr(className.find_last_of("/")+1,className.length()-1);
-            
-			std::string p = path + fn;
-			files.insert(std::pair<std::string, std::string>(p, className));
-		}
-		else if(ptr->d_type == 10)    ///link file
-		{}
-		else if(ptr->d_type == 4)    ///dir
-		{
-            std::string p = path + std::string(ptr->d_name);
-            getFiles2(p,files);
-        }
-	}
-	
-	closedir(dir);
-	return ;
-}
-
-void updatedb(std::map<dlib::matrix<float,0,1>, std::string> &faceDescriptorsLib)
+void updateResnetDb(std::map<dlib::matrix<float,0,1>, std::string> &faceDescriptorsLib)
 {
     std::string facedbPath = "./data/face_database";
     
@@ -150,64 +104,113 @@ void refitEIEModel()
     eieModel.save();
 }
 
-void handleFaceDb()
+void handleFaceDb(int method)
 {
-    std::string faceDbPath = "./data/face_database";    
-    std::string eieModelPath = "./data/ELM_Models";
-    
-    std::vector<std::string> label_string;
-    std::vector<cv::Mat> trainImgs;
-    std::vector<cv::Mat> testImgs;
-    std::vector<std::vector<bool>> trainLabelBins;
-    std::vector<std::vector<bool>> testLabelBins;
-    inputImgsFrom(faceDbPath,label_string,trainImgs,testImgs,trainLabelBins,testLabelBins,1,3);
-    
-    //人脸检测初始化
-    SimdDetection detection;
-    detection.Load("./data/cascade/haar_face_0.xml");
-    //人脸对齐初始化
-    FaceAlignment alignment;
-    
-    //对库中图像进行人脸检测并裁剪、对齐
-    for(int i=0;i<trainImgs.size();i++)
+    if(method == 1)
     {
-        cv::Size srcSize = trainImgs[i].size();
-        detection.Init(srcSize,1.2,srcSize/5);
-        SimdDetection::View image = trainImgs[i];
-        SimdDetection::Objects objects;
-        detection.Detect(image, objects);
+        std::map<std::string, std::string> files;
+        getFiles("./data/face_database",files);
         
-        cv::Rect faceRect;
-        if(objects.empty())
-            faceRect = cv::Rect(0,0,trainImgs[i].cols,trainImgs[i].rows);
-        else
-            faceRect = objects[0].rect;
+        //人脸检测初始化
+        FaceDetection detection;
+        //人脸对齐初始化
+        FaceAlignment alignment;
         
-        //对齐
-        dlib::full_object_detection shape;
-        alignment.getShape(trainImgs[i],faceRect,shape);
-        cv::Mat resultImg;
-        alignment.alignFace(trainImgs[i],faceRect,resultImg);
+        //对库中图像进行人脸检测并裁剪、对齐
+        for(std::map<std::string, std::string>::iterator it = files.begin(); it != files.end(); it++  )
+        {
+            cv::Mat image = cv::imread(it->first);
+            
+            if(isMarkedImg(image))
+                continue;
+            
+            std::cout <<"handling file:" <<it->first<<std::endl;
+            
+            std::vector<cv::Rect> objects;
+            detection.detect(image, objects);
+            
+            cv::Rect faceRect;
+            if(objects.empty())
+                faceRect = cv::Rect(0,0,image.cols,image.rows);
+            else
+                faceRect = objects[0];
+            
+            //std::cout<<"image.size: "<<image.size<<std::endl;
+            //std::cout<<"faceRect: "<<faceRect<<std::endl;
+            
+            //对齐
+            dlib::full_object_detection shape;
+            alignment.getShape(image,faceRect,shape);
+            cv::Mat resultImg;
+            alignment.alignFace(image,faceRect,resultImg);
+            
+            //cv::imshow("detect+alignment",resultImg);
+            //cv::waitKey();
+            
+            //输出
+            markImg(resultImg);
+            std::string outFile = it->first;
+            outFile = outFile.substr(0,outFile.find_last_of("."));
+            outFile += ".png";//jpg编码存取数据不一致，必须转成png格式
+            remove(it->first.data());
+            cv::imwrite(outFile,resultImg);
+        }
         
-        //cv::imshow("detect+alignment",resultImg);
-        //cv::waitKey();
-        
-        cv::cvtColor(resultImg,trainImgs[i],cv::COLOR_BGR2GRAY);
+        //重新训练elm-in-elm模型
+        refitEIEModel();
     }
     
-    //训练elm-in-elm模型
-    ELM_IN_ELM_Model eieModel;
-    int nModels = 10;
-    eieModel.setInitPara(nModels,eieModelPath);
-    for(int i=0;i<nModels;i++)
-        eieModel.setSubModelHiddenNodes(i,100);
-    eieModel.loadFaces(trainImgs,label_string,trainLabelBins,50,50);
-    eieModel.fitSubModels();
-    eieModel.fitMainModel();
-    eieModel.save();
+    if(method == 2)
+    {
+        //重新用resnet模型提取特征库
+        std::cout<<"updating resnet"<<std::endl;
+        std::map<dlib::matrix<float,0,1>, std::string> faceDescriptorsLib;
+        updateResnetDb(faceDescriptorsLib);
+    }
+}
+
+void markImg(cv::Mat &img)
+{
+    int c = img.cols-1;
+    int r = img.rows-1;
     
-    //重新用resnet模型提取特征库
-    std::cout<<"updating resnet"<<std::endl;
-    std::map<dlib::matrix<float,0,1>, std::string> faceDescriptorsLib;
-    updatedb(faceDescriptorsLib);
+    img.at<cv::Vec3b>(0,0)[0] = 101;
+    img.at<cv::Vec3b>(0,0)[1] = 100;
+    img.at<cv::Vec3b>(0,0)[2] = 101;
+    img.at<cv::Vec3b>(r,0)[0] = 100;
+    img.at<cv::Vec3b>(r,0)[1] = 101;
+    img.at<cv::Vec3b>(r,0)[2] = 100;
+    img.at<cv::Vec3b>(0,c)[0] = 101;
+    img.at<cv::Vec3b>(0,c)[1] = 100;
+    img.at<cv::Vec3b>(0,c)[2] = 101;
+    img.at<cv::Vec3b>(r,c)[0] = 100;
+    img.at<cv::Vec3b>(r,c)[1] = 101;
+    img.at<cv::Vec3b>(r,c)[2] = 100;
+}
+
+bool isMarkedImg(const cv::Mat &img)
+{
+    int c = img.cols-1;
+    int r = img.rows-1;
+    
+    std::string key;
+    key.append(std::to_string(img.at<cv::Vec3b>(0,0)[0]));
+    key.append(std::to_string(img.at<cv::Vec3b>(0,0)[1]));
+    key.append(std::to_string(img.at<cv::Vec3b>(0,0)[2]));
+    key.append(std::to_string(img.at<cv::Vec3b>(r,0)[0]));
+    key.append(std::to_string(img.at<cv::Vec3b>(r,0)[1]));
+    key.append(std::to_string(img.at<cv::Vec3b>(r,0)[2]));
+    key.append(std::to_string(img.at<cv::Vec3b>(0,c)[0]));
+    key.append(std::to_string(img.at<cv::Vec3b>(0,c)[1]));
+    key.append(std::to_string(img.at<cv::Vec3b>(0,c)[2]));
+    key.append(std::to_string(img.at<cv::Vec3b>(r,c)[0]));
+    key.append(std::to_string(img.at<cv::Vec3b>(r,c)[1]));
+    key.append(std::to_string(img.at<cv::Vec3b>(r,c)[2]));
+    
+    //std::cout<<key<<std::endl;
+    
+    if(key == "101100101100101100101100101100101100")
+        return true;
+    else
+        return false;
 }

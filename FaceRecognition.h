@@ -67,8 +67,8 @@ public:
     
     void getDescriptor(const cv::Mat &src, const dlib::full_object_detection &shape, dlib::matrix<float,0,1> &faceDescriptor);
     
-    void init_updatedb();
-    void init_loadDb();
+    void init_updateResnetDb();
+    void init_loadResnetDb();
     
     void init_updateEIEdb();
     void init_loadEIEdb();
