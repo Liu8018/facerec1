@@ -48,8 +48,6 @@ public:
     //计算在测试数据上的准确率
     float validate();
     
-    void init_greedyFitWhole(int g);
-    
 private:
     int m_n_models;
     std::vector<int> m_subModelHiddenNodes;

@@ -287,50 +287,6 @@ std::cout<<"H*F:"<<realOutput.size<<"\n"<<H*m_F<<std::endl;
 */
 }
 
-void ELM_IN_ELM_Model::init_greedyFitWhole(int g)
-{
-    int n_models = m_n_models;
-    m_subModels.clear();
-    
-    ELM_Model subModel;
-    subModel.inputData_2d(m_trainImgs,m_trainLabelBins,m_width,m_height,m_channels);
-    subModel.inputData_2d_test(m_testImgs,m_testLabelBins);
-    
-    float maxScore = 0;
-    for(int n=1;n<=n_models;n++)
-    {
-        m_n_models = n;
-        m_subModels.resize(n);
-        
-        subModel.setHiddenNodes(m_subModelHiddenNodes[n-1]);
-        
-        ELM_Model maxSubModel;
-
-        for(int i=0;i<g;i++)
-        {
-            subModel.fit(-1,false);
-            m_subModels[n-1] = subModel;
-            fitMainModel(-1,false);
-            
-            float score = validate();
-            if(score > maxScore)
-            {
-                std::cout<<"g score:"<<score<<std::endl;
-                maxScore = score;
-                maxSubModel = subModel;
-            }
-            
-            subModel.clear();
-            m_K.release();
-            m_F.release();
-        }
-        
-        m_subModels[n-1] = maxSubModel;
-    }
-    
-    std::cout<<"final score:"<<maxScore<<std::endl;
-}
-
 float ELM_IN_ELM_Model::validate()
 {
     int M = m_n_models;
@@ -415,7 +371,6 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, std::string &label)
     {
         cv::Mat ROI = H(cv::Range(0,1),cv::Range(m*m_C,(m+1)*m_C));
         m_subModels[m].query(mat,ROI);
-        normalize(ROI);
     }
     
     cv::Mat output = H * m_F;
@@ -450,7 +405,6 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
     {
         cv::Mat ROI = H(cv::Range(0,1),cv::Range(m*m_C,(m+1)*m_C));
         m_subModels[m].query(mat,ROI);
-        normalize(ROI);
     }
     
     cv::Mat output = H * m_F;
@@ -471,7 +425,7 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
 
 void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::vector<std::string> &labels)
 {
-    cv::Mat gray;//,lbp;
+    cv::Mat gray;
     if(mat.channels() == 3)
         cv::cvtColor(mat,gray,cv::COLOR_BGR2GRAY);
     

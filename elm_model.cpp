@@ -40,9 +40,12 @@ void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::
     for(int i=0;i<mats.size();i++)
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
     //mats2lines(mats,m_inputLayerData,m_channels);
+    //std::cout<<"calculating pca..."<<std::endl;
     m_pcaFace.calc(mats);
+    //std::cout<<"pca calculated"<<std::endl;
     m_pcaFace.reduceDim(mats,m_inputLayerData);
-    normalize_img(m_inputLayerData);
+    //normalize_img(m_inputLayerData);
+    normalize(m_inputLayerData);
     
     //确定输入层节点数
     m_I = m_inputLayerData.cols;
@@ -66,7 +69,8 @@ void ELM_Model::inputData_2d_test(std::vector<cv::Mat> &mats, const std::vector<
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
     //mats2lines(mats,m_inputLayerData_test,m_channels);
     m_pcaFace.reduceDim(mats,m_inputLayerData_test);
-    normalize_img(m_inputLayerData_test);
+    //normalize_img(m_inputLayerData_test);
+    normalize(m_inputLayerData_test);
 }
 
 void ELM_Model::loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle)
@@ -220,6 +224,7 @@ float ELM_Model::validate()
         return 0;
 }
 
+/*
 void ELM_Model::query(const cv::Mat &mat, std::string &label)
 {
     //转化为一维数据
@@ -240,6 +245,7 @@ void ELM_Model::query(const cv::Mat &mat, std::string &label)
     int id = getMaxId(output);
     label = m_label_string[id];
 }
+*/
 
 void ELM_Model::query(const cv::Mat &mat, cv::Mat &output)
 {
@@ -247,11 +253,22 @@ void ELM_Model::query(const cv::Mat &mat, cv::Mat &output)
     cv::Mat inputLine;//(cv::Size(m_width*m_channels*m_height,1),CV_32F);
     cv::Mat tmpImg;
     cv::resize(mat,tmpImg,cv::Size(m_width,m_height));
+    
+    //debug
+    //cv::imshow("input img",tmpImg);
+    
     //mat2line(tmpImg,inputLine,m_channels);
     std::vector<cv::Mat> mats;
     mats.push_back(mat);
     m_pcaFace.reduceDim(mats,inputLine);
-    normalize_img(inputLine);
+    
+    //debug
+    //std::cout<<"inputLine:\n"<<inputLine<<std::endl;
+    
+    normalize(inputLine);
+    
+    //debug
+    //std::cout<<"nomalized inputLine:\n"<<inputLine<<std::endl;
     
     //乘权重，加偏置，激活
     cv::Mat H = inputLine * m_W_IH;
@@ -260,6 +277,11 @@ void ELM_Model::query(const cv::Mat &mat, cv::Mat &output)
     
     //计算输出
     output = H * m_W_HO;
+    
+    //debug
+    //std::cout<<"output:\n"<<output<<std::endl;
+    
+    //cv::waitKey();
 }
 
 void ELM_Model::batchQuery(std::vector<cv::Mat> &inputMats, cv::Mat &outputMat)
@@ -269,7 +291,7 @@ void ELM_Model::batchQuery(std::vector<cv::Mat> &inputMats, cv::Mat &outputMat)
     
     cv::Mat inputLayerData;//(cv::Size(m_width*m_height*m_channels,inputMats.size()),CV_32F);
     m_pcaFace.reduceDim(inputMats,inputLayerData);
-    normalize_img(inputLayerData);
+    normalize(inputLayerData);
 
     cv::Mat H = inputLayerData * m_W_IH;
     addBias(H,m_B_H);

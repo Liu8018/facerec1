@@ -19,7 +19,6 @@ private:
     unsigned char * pBuffer;
     
     int resizeWidth;
-    float resizeRatio;
 };
 
 #endif // FACEDETECTOR_H

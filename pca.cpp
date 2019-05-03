@@ -67,6 +67,7 @@ void PCA_Face::calc(std::vector<cv::Mat> &faces)
     //    return;
     
     cv::Mat data = asRowMatrix(faces, CV_32FC1);//Q*MN
+    //std::cout<<data.size<<std::endl;
     m_pca = cv::PCA(data, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
 }
 

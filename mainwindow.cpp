@@ -65,6 +65,8 @@ void MainWindow::setMethod(std::string method)
         getFiles("./data/face_database",files);
         if(files.empty())
             isEmptyRun = true;
+        else
+            isEmptyRun = false;
     }
 }
 
@@ -114,6 +116,9 @@ void MainWindow::updateFrame()
                 cv::Mat alignedFaceROI;
                 m_alignment.alignFace(m_frameSrc,objects[0],alignedFaceROI);
                 alignedFaceROI.copyTo(m_faceROI);
+                
+                //debug
+                //cv::imshow("alignedFaceROI",alignedFaceROI);
                 
                 //人脸识别
                 int n = 2;
