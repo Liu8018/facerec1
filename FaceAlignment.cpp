@@ -43,7 +43,7 @@ void FaceAlignment::drawShape(cv::Mat &img, dlib::full_object_detection shape)
 
 void FaceAlignment::alignFace(const cv::Mat &inputImg, const cv::Rect &faceRect, cv::Mat &resultImg)
 {
-    /*
+    
     dlib::full_object_detection shape;
     getShape(inputImg,faceRect,shape);
     
@@ -61,19 +61,12 @@ void FaceAlignment::alignFace(const cv::Mat &inputImg, const cv::Rect &faceRect,
     double angle = atan2(dy, dx) * 180.0 / CV_PI; 
     cv::Mat rotMat = cv::getRotationMatrix2D(center, angle, 1); 
     cv::warpAffine(faceROI, resultImg, rotMat, faceROI.size());
-    */
     
-    resultImg = inputImg(faceRect);
-    
-    /*
     //test
     cv::Mat image = inputImg.clone();
-    cv::line(image,landmarks[45],landmarks[36],cv::Scalar(0,255,0),1);
-    for(int i=0;i<landmarks.size();i++)
-    {
-        cv::circle(image,landmarks[i],3,cv::Scalar(255,0,0));
-        cv::putText(image,std::to_string(i),landmarks[i],1,1,cv::Scalar(0,255,0));
-    }
+    drawShape(image,shape);;
+    cv::namedWindow("testImage",0);
     cv::imshow("testImage",image);
-    */
+    
+    //resultImg = inputImg(faceRect);
 }
