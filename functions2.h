@@ -14,4 +14,5 @@ void markImg(cv::Mat &img);
 bool isMarkedImg(const cv::Mat &img);
 
 
+
 #endif // FUNCTIONS2_H

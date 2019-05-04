@@ -80,15 +80,15 @@ void MainWindow::updateFrame()
     std::vector<cv::Rect> objects;
     m_detection.detect(m_frame, objects);
     
-    //debug
-    if(objects.empty())
-        objects.push_back(debugRect);
-    else
-        debugRect = objects[0];
-    
     if(!objects.empty())
     {
-        m_faceROI = m_frameSrc(objects[0]);
+        m_faceROI = m_frameSrc(objects[0]).clone();
+        m_faceRect = objects[0];
+        
+        //人脸对齐，修正检测结果
+        cv::Mat alignedFaceROI;
+        m_alignment.alignFace(m_frameSrc,objects[0],alignedFaceROI);
+        alignedFaceROI.copyTo(m_faceROI);
         
         //绘制检测结果
         cv::rectangle(m_frame,objects[0],cv::Scalar(0,255,255),2);
@@ -100,27 +100,13 @@ void MainWindow::updateFrame()
             
             if(m_rec.method == "resnet")
             {
-                //人脸对齐
                 dlib::full_object_detection shape;
                 m_alignment.getShape(m_frameSrc,objects[0],shape);
-                
-                //m_alignment.drawShape(m_frame,shape);
-                
-                //人脸识别
                 isInFaceDb = m_rec.recognize(m_frameSrc,shape,name);
             }
             
             if(m_rec.method == "elm")
             {
-                //人脸对齐
-                cv::Mat alignedFaceROI;
-                m_alignment.alignFace(m_frameSrc,objects[0],alignedFaceROI);
-                alignedFaceROI.copyTo(m_faceROI);
-                
-                //debug
-                //cv::imshow("alignedFaceROI",alignedFaceROI);
-                
-                //人脸识别
                 int n = 2;
                 std::vector<std::string> names;
                 isInFaceDb = m_rec.recognize(alignedFaceROI,n,names);
@@ -184,6 +170,7 @@ void MainWindow::on_pushButton_SignUp_clicked()
     //信息传递
     connect(signUpDlg, SIGNAL(sendData(bool, std::string)), this, SLOT(addFace(bool, std::string)));
     
+    //m_alignment.alignFace(m_frameSrc,m_faceRect,m_faceROI);
     signUpDlg->setImg(m_faceROI);
     signUpDlg->show();
     signUpDlg->exec();

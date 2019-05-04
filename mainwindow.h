@@ -37,7 +37,7 @@ private:
     FaceRecognition m_rec;
     cv::Mat m_faceROI;
     
-    cv::Rect debugRect;
+    cv::Rect m_faceRect;
     
     QImage m_qimgFrame;
     QTimer *m_timer = new QTimer(this);
