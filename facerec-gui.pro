@@ -34,7 +34,8 @@ SOURCES += \
     elm_in_elm_model.cpp \
     elm_model.cpp \
     pca.cpp \
-    FaceDetection.cpp
+    FaceDetection.cpp \
+    functions2.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -46,7 +47,8 @@ HEADERS += \
     ELM_functions.h \
     elm_in_elm_model.h \
     elm_model.h \
-    pca.h
+    pca.h \
+    functions2.h
 
 FORMS += \
         mainwindow.ui \

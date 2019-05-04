@@ -87,23 +87,6 @@ void updateResnetDb(std::map<dlib::matrix<float,0,1>, std::string> &faceDescript
     dlib::serialize("./data/face_database/faceDescriptors.dat") << faceDescriptorsLib;
 }
 
-void refitEIEModel()
-{
-    std::string faceDbPath = "./data/face_database";
-    std::string eieModelPath = "./data/ELM_Models";
-    
-    ELM_IN_ELM_Model eieModel;
-    
-    int nModels = 10;
-    eieModel.setInitPara(nModels,eieModelPath);
-    eieModel.loadStandardFaceDataset(faceDbPath,1,50,50);
-    for(int i=0;i<nModels;i++)
-        eieModel.setSubModelHiddenNodes(i,100);
-    eieModel.fitSubModels();
-    eieModel.fitMainModel();
-    eieModel.save();
-}
-
 void handleFaceDb(int method)
 {
     if(method == 1)
@@ -169,48 +152,4 @@ void handleFaceDb(int method)
     }
 }
 
-void markImg(cv::Mat &img)
-{
-    int c = img.cols-1;
-    int r = img.rows-1;
-    
-    img.at<cv::Vec3b>(0,0)[0] = 101;
-    img.at<cv::Vec3b>(0,0)[1] = 100;
-    img.at<cv::Vec3b>(0,0)[2] = 101;
-    img.at<cv::Vec3b>(r,0)[0] = 100;
-    img.at<cv::Vec3b>(r,0)[1] = 101;
-    img.at<cv::Vec3b>(r,0)[2] = 100;
-    img.at<cv::Vec3b>(0,c)[0] = 101;
-    img.at<cv::Vec3b>(0,c)[1] = 100;
-    img.at<cv::Vec3b>(0,c)[2] = 101;
-    img.at<cv::Vec3b>(r,c)[0] = 100;
-    img.at<cv::Vec3b>(r,c)[1] = 101;
-    img.at<cv::Vec3b>(r,c)[2] = 100;
-}
 
-bool isMarkedImg(const cv::Mat &img)
-{
-    int c = img.cols-1;
-    int r = img.rows-1;
-    
-    std::string key;
-    key.append(std::to_string(img.at<cv::Vec3b>(0,0)[0]));
-    key.append(std::to_string(img.at<cv::Vec3b>(0,0)[1]));
-    key.append(std::to_string(img.at<cv::Vec3b>(0,0)[2]));
-    key.append(std::to_string(img.at<cv::Vec3b>(r,0)[0]));
-    key.append(std::to_string(img.at<cv::Vec3b>(r,0)[1]));
-    key.append(std::to_string(img.at<cv::Vec3b>(r,0)[2]));
-    key.append(std::to_string(img.at<cv::Vec3b>(0,c)[0]));
-    key.append(std::to_string(img.at<cv::Vec3b>(0,c)[1]));
-    key.append(std::to_string(img.at<cv::Vec3b>(0,c)[2]));
-    key.append(std::to_string(img.at<cv::Vec3b>(r,c)[0]));
-    key.append(std::to_string(img.at<cv::Vec3b>(r,c)[1]));
-    key.append(std::to_string(img.at<cv::Vec3b>(r,c)[2]));
-    
-    //std::cout<<key<<std::endl;
-    
-    if(key == "101100101100101100101100101100101100")
-        return true;
-    else
-        return false;
-}
