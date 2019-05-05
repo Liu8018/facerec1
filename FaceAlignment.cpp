@@ -145,5 +145,4 @@ void FaceAlignment::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::M
     */
     
     resultImg = rotatedImg(faceRect).clone();
-    
 }

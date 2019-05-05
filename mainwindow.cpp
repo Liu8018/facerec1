@@ -82,13 +82,13 @@ void MainWindow::updateFrame()
     
     if(!objects.empty())
     {
-        m_faceROI = m_frameSrc(objects[0]).clone();
-        m_faceRect = objects[0];
-        
         //人脸对齐，修正检测结果
         cv::Mat alignedFaceROI;
         m_alignment.alignFace(m_frameSrc,objects[0],alignedFaceROI);
         alignedFaceROI.copyTo(m_faceROI);
+        
+        m_faceROI = m_frameSrc(objects[0]).clone();
+        m_faceRect = objects[0];
         
         //绘制检测结果
         cv::rectangle(m_frame,objects[0],cv::Scalar(0,255,255),2);
