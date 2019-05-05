@@ -10,7 +10,7 @@ FaceDetection::FaceDetection()
         exit(0);
     }
 
-    resizeWidth = 100;//最小84
+    resizeWidth = 600;//最小84
 }
 
 void FaceDetection::detect(const cv::Mat &src, std::vector<cv::Rect> &faceRects)

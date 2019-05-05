@@ -85,35 +85,39 @@ void modifyRectByFacePt(const dlib::full_object_detection &shape, cv::Rect &rect
 
 void FaceAlignment::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::Mat &resultImg)
 {
-    //把矩形框扩大一点，获取特征点会更精准
+    /*
+    //把矩形框扩大一点
     int refLen = faceRect.width/5;
     faceRect.x -= refLen;
-    faceRect.width += refLen;
+    faceRect.width += 2*refLen;
     faceRect.y -= refLen;
-    faceRect.height += refLen;
+    faceRect.height += 2*refLen;
     modifyROI(inputImg.size(),faceRect);
+    */
     
     //获取特征点
     dlib::full_object_detection shape;
     getShape(inputImg,faceRect,shape);
     
-    /*
+    
     //test
     cv::Mat testImg = inputImg.clone();
     cv::rectangle(testImg,faceRect,cv::Scalar(255,0,0));
     drawShape(testImg,shape);
     cv::imshow("tmpImg",testImg);
-    */
+    
     
     //shape转化为landmarks
     std::vector<cv::Point> landmarks;
     dlibPoint2cvPoint(shape,landmarks);
     
+    /*
     //根据特征点更正矩形框，鼻尖对齐矩形框中心
     cv::Point nosePt = landmarks[30];
     faceRect.x = nosePt.x - faceRect.width/2;
     faceRect.y = nosePt.y - faceRect.height/2;
     modifyROI(inputImg.size(),faceRect);
+    */
     
     //以两眼连线偏角绕矩形框中心旋转整幅图像
     cv::Point leye = landmarks[36];
@@ -130,8 +134,8 @@ void FaceAlignment::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::M
     dlib::full_object_detection shape2;
     getShape(rotatedImg,faceRect,shape2);
     //drawShape(rotatedImg,shape2);
-    modifyRectByFacePt(shape2,faceRect);
-    modifyROI(rotatedImg.size(),faceRect);
+    //modifyRectByFacePt(shape2,faceRect);
+    //modifyROI(rotatedImg.size(),faceRect);
     resultImg = rotatedImg(faceRect).clone();
     
 }

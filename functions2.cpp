@@ -7,11 +7,11 @@ void refitEIEModel()
     
     ELM_IN_ELM_Model eieModel;
     
-    int nModels = 5;//超参1:elm模型数目
+    int nModels = 10;//超参1:elm模型数目
     eieModel.setInitPara(nModels,eieModelPath);
-    eieModel.loadStandardFaceDataset(faceDbPath,1,20,20);//超参2:resize大小
+    eieModel.loadStandardFaceDataset(faceDbPath,1,50,50);//超参2:resize大小
     for(int i=0;i<nModels;i++)
-        eieModel.setSubModelHiddenNodes(i,500);//超参3:elm隐藏层节点数
+        eieModel.setSubModelHiddenNodes(i,200);//超参3:elm隐藏层节点数
     eieModel.fitSubModels();
     eieModel.fitMainModel();
     eieModel.save();
