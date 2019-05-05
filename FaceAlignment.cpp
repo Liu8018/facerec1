@@ -66,10 +66,10 @@ void modifyRectByFacePt(const dlib::full_object_detection &shape, cv::Rect &rect
     int l3 = landmarks[17].x;
     int l = l1<l2?(l1<l3?l1:l3):(l2<l3?l2:l3);
     
-    int r1 = landmarks[14].x;
+    int r1 = landmarks[26].x;
     int r2 = landmarks[15].x;
     int r3 = landmarks[16].x;
-    int r = r1<r2?(r1<r3?r1:r3):(r2<r3?r2:r3);
+    int r = r1>r2?(r1>r3?r1:r3):(r2>r3?r2:r3);
     
     int t1 = landmarks[19].y;
     int t2 = landmarks[24].y;
@@ -99,13 +99,13 @@ void FaceAlignment::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::M
     dlib::full_object_detection shape;
     getShape(inputImg,faceRect,shape);
     
-    
+    /*
     //test
     cv::Mat testImg = inputImg.clone();
     cv::rectangle(testImg,faceRect,cv::Scalar(255,0,0));
     drawShape(testImg,shape);
     cv::imshow("tmpImg",testImg);
-    
+    */
     
     //shape转化为landmarks
     std::vector<cv::Point> landmarks;
@@ -133,9 +133,17 @@ void FaceAlignment::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::M
     //取这时矩形框内的部分作为人脸
     dlib::full_object_detection shape2;
     getShape(rotatedImg,faceRect,shape2);
-    //drawShape(rotatedImg,shape2);
-    //modifyRectByFacePt(shape2,faceRect);
-    //modifyROI(rotatedImg.size(),faceRect);
+    modifyRectByFacePt(shape2,faceRect);
+    modifyROI(rotatedImg.size(),faceRect);
+    
+    /*
+    //test
+    cv::Mat testImg2 = rotatedImg.clone();
+    cv::rectangle(testImg2,faceRect,cv::Scalar(255,0,0));
+    drawShape(testImg2,shape2);
+    cv::imshow("rotatedImg",testImg2);
+    */
+    
     resultImg = rotatedImg(faceRect).clone();
     
 }

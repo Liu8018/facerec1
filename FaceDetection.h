@@ -1,11 +1,13 @@
 #ifndef FACEDETECTOR_H
 #define FACEDETECTOR_H
 
-#include "facedetectcnn.h"
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
+#include <dlib/image_processing/frontal_face_detector.h>
+#include <dlib/image_processing/render_face_detections.h>
+#include <dlib/image_processing.h>
+#include <dlib/gui_widgets.h>
+#include <dlib/image_io.h>
+#include <dlib/opencv.h>
 
-#define DETECT_BUFFER_SIZE 0x20000
 
 class FaceDetection
 {
@@ -15,10 +17,7 @@ public:
     void detect(const cv::Mat &src, std::vector<cv::Rect> &faceRects);
     
 private:
-    int * pResults;
-    unsigned char * pBuffer;
-    
-    int resizeWidth;
+    dlib::frontal_face_detector m_ffd;
 };
 
 #endif // FACEDETECTOR_H
