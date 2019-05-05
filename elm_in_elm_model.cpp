@@ -429,7 +429,12 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
     std::cout<<"----------------------------------"<<std::endl;
     
     //计算欧氏距离前的处理。
+    normalize(output);
     output /= cv::norm(output);
+    
+    for(int i=0;i<m_C;i++)
+        std::cout<<"name:"<<m_label_string[i]<<" score:"<<output.at<float>(0,i)<<std::endl;
+    std::cout<<"----------------------------------"<<std::endl;
     
     //与每个种类的标准输出分别计算欧氏距离
     std::vector<float> diffs(m_C);
