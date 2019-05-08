@@ -108,7 +108,7 @@ void MainWindow::updateFrame()
             
             if(m_rec.method == "elm")
             {
-                int n = 2;
+                int n = 5;
                 std::vector<std::string> names;
                 isInFaceDb = m_rec.recognize(m_faceROI,n,names);
                 
