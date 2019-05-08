@@ -83,12 +83,13 @@ void MainWindow::updateFrame()
     if(!objects.empty())
     {
         //人脸对齐，修正检测结果
-        cv::Mat alignedFaceROI;
-        m_alignment.alignFace(m_frameSrc,objects[0],alignedFaceROI);
-        alignedFaceROI.copyTo(m_faceROI);
-        
-        m_faceROI = m_frameSrc(objects[0]).clone();
+        m_alignment.alignFace(m_frameSrc,objects[0],m_faceROI);
         m_faceRect = objects[0];
+        
+        cv::cvtColor(m_faceROI,m_faceROI,cv::COLOR_BGR2GRAY);
+        //cv::imshow("m_faceROI",m_faceROI);
+        cv::equalizeHist(m_faceROI,m_faceROI);
+        //cv::imshow("m_faceROI_eq",m_faceROI);
         
         //绘制检测结果
         cv::rectangle(m_frame,objects[0],cv::Scalar(0,255,255),2);
@@ -109,7 +110,7 @@ void MainWindow::updateFrame()
             {
                 int n = 2;
                 std::vector<std::string> names;
-                isInFaceDb = m_rec.recognize(alignedFaceROI,n,names);
+                isInFaceDb = m_rec.recognize(m_faceROI,n,names);
                 
                 //for(int i=0;i<n;i++)
                 //    std::cout<<"names["<<i<<"]:"<<names[i]<<std::endl;

@@ -66,9 +66,15 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
                   trainSampleRatio,m_channels,shuffle);
     
     for(int i=0;i<m_trainImgs.size();i++)
+    {
         cv::resize(m_trainImgs[i],m_trainImgs[i],cv::Size(m_width,m_height));
+        cv::equalizeHist(m_trainImgs[i],m_trainImgs[i]);
+    }
     for(int i=0;i<m_testImgs.size();i++)
+    {
         cv::resize(m_testImgs[i],m_testImgs[i],cv::Size(m_width,m_height));
+        cv::equalizeHist(m_testImgs[i],m_testImgs[i]);
+    }
     
     /*
     getAverageImg(m_trainImgs,m_averageFace);
@@ -422,6 +428,7 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
     for(int i=0;i<n;i++)
         labels[i].assign(m_label_string[ids[i]]);
     
+    /*
     //test
     std::cout<<"[output begin]-------------------------------------"<<std::endl;
     for(int i=0;i<m_C;i++)
@@ -447,6 +454,7 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
     for(int i=0;i<m_C;i++)
         std::cout<<"name:"<<m_label_string[i]<<" diff:"<<diffs[i]<<std::endl;
     std::cout<<"[output end]-------------------------------------\n"<<std::endl;
+    */
 }
 
 void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::vector<std::string> &labels)
@@ -454,6 +462,8 @@ void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::vector<std::str
     cv::Mat gray;
     if(mat.channels() == 3)
         cv::cvtColor(mat,gray,cv::COLOR_BGR2GRAY);
+    else
+        mat.copyTo(gray);
     
     cv::resize(gray,gray,cv::Size(m_width,m_height));
     
