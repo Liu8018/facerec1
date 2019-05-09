@@ -278,7 +278,7 @@ void sigmoid(cv::Mat &H)
 {
     for(int i=0;i<H.rows;i++)
         for(int j=0;j<H.cols;j++)
-            H.at<float>(i,j) = 1 / ( 1 + std::exp(-H.at<float>(i,j)) );
+            H.at<float>(i,j) = 1.0 / ( 1.0 + std::exp(-H.at<float>(i,j)) );
 }
 
 //归一化

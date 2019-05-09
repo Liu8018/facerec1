@@ -2,6 +2,7 @@
 #define ELM_IN_ELM_MODEL_H
 
 #include "elm_model.h"
+#include <map>
 
 class ELM_IN_ELM_Model
 {
@@ -40,8 +41,8 @@ public:
     void queryFace(const cv::Mat &mat, std::string &label);
     
     //得到前n个最大值ID
-    void query(const cv::Mat &mat, int n, std::vector<std::string> &labels);
-    void queryFace(const cv::Mat &mat, int n, std::vector<std::string> &labels);
+    void query(const cv::Mat &mat, int n, std::map<float,std::string> &nameScores);
+    void queryFace(const cv::Mat &mat, int n, std::map<float,std::string> &nameScores);
     
     void clearTrainData();
     

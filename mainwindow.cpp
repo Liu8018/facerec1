@@ -7,12 +7,74 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    
+    ui->label_names->setStyleSheet("background:transparent;color:blue");
+    ui->label_names->setFont(QFont("Microsoft YaHei", 18, 75));
+    ui->label_names->setAlignment(Qt::AlignTop);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
     delete m_timer;
+}
+
+void MainWindow::showMat()
+{
+    cv::Mat frameToShow;
+    cv::resize(m_frame,frameToShow,cv::Size(ui->label_Main->width()-2,ui->label_Main->height()-2));
+
+    cv::cvtColor(frameToShow,frameToShow,cv::COLOR_BGR2RGB);
+    m_qimgFrame = QImage((const uchar*)frameToShow.data,
+                  frameToShow.cols,frameToShow.rows,
+                  frameToShow.cols*frameToShow.channels(),
+                  QImage::Format_RGB888);
+
+    ui->label_Main->setPixmap(QPixmap::fromImage(m_qimgFrame));
+}
+
+void MainWindow::showNames(std::map<float,std::string> nameScores)
+{
+    QString qstr;
+    //反向遍历并输出
+    for(std::map<float,std::string>::reverse_iterator it = nameScores.rbegin();it!=nameScores.rend();it++)
+    {
+        qstr.append(it->second.data());
+        qstr.append(":");
+        qstr.append(std::to_string(it->first).substr(0,6).data());
+        qstr.append("\n");
+    }
+    ui->label_names->setText(qstr);
+}
+
+void MainWindow::on_pushButton_Recognize_clicked()
+{
+    m_isDoFaceRec = true;
+    m_faceRecStartTick = cv::getTickCount();
+}
+
+void MainWindow::on_pushButton_SignUp_clicked()
+{
+    if(m_faceROI.empty())
+        return;
+    
+    m_timer->stop();
+    
+    //创建登记窗口
+    SignUpDialog *signUpDlg = new SignUpDialog();
+    //登记窗口打开时停止其他窗口的运行
+    signUpDlg->setWindowModality(Qt::ApplicationModal);
+    //信息传递
+    connect(signUpDlg, SIGNAL(sendData(bool, std::string)), this, SLOT(addFace(bool, std::string)));
+    
+    //m_alignment.alignFace(m_frameSrc,m_faceRect,m_faceROI);
+    signUpDlg->setImg(m_faceROI);
+    signUpDlg->show();
+    signUpDlg->exec();
+    
+    delete signUpDlg;
+    
+    m_timer->start();
 }
 
 void MainWindow::setVideo(std::string video)
@@ -82,7 +144,7 @@ void MainWindow::updateFrame()
     
     if(!objects.empty())
     {
-        //人脸对齐，修正检测结果
+        //人脸对齐
         m_alignment.alignFace(m_frameSrc,objects[0],m_faceROI);
         m_faceRect = objects[0];
         
@@ -109,14 +171,16 @@ void MainWindow::updateFrame()
             if(m_rec.method == "elm")
             {
                 int n = 5;
-                std::vector<std::string> names;
-                isInFaceDb = m_rec.recognize(m_faceROI,n,names);
+                std::map<float,std::string> nameScores;
+                isInFaceDb = m_rec.recognize(m_faceROI,n,nameScores);
+                
+                showNames(nameScores);
                 
                 //for(int i=0;i<n;i++)
                 //    std::cout<<"names["<<i<<"]:"<<names[i]<<std::endl;
                 
-                if(!names.empty())
-                    name = names[0];
+                if(!nameScores.empty())
+                    name = nameScores.rbegin()->second;
                 else
                     name = "others";
             }
@@ -133,52 +197,12 @@ void MainWindow::updateFrame()
                 m_isDoFaceRec = false;
         }
     }
+    else
+    {
+        //ui->label_names->clear();
+    }
     
     showMat();
-}
-
-void MainWindow::showMat()
-{
-    cv::Mat frameToShow;
-    cv::resize(m_frame,frameToShow,cv::Size(ui->label_Main->width()-2,ui->label_Main->height()-2));
-
-    cv::cvtColor(frameToShow,frameToShow,cv::COLOR_BGR2RGB);
-    m_qimgFrame = QImage((const uchar*)frameToShow.data,
-                  frameToShow.cols,frameToShow.rows,
-                  frameToShow.cols*frameToShow.channels(),
-                  QImage::Format_RGB888);
-
-    ui->label_Main->setPixmap(QPixmap::fromImage(m_qimgFrame));
-}
-
-void MainWindow::on_pushButton_Recognize_clicked()
-{
-    m_isDoFaceRec = true;
-    m_faceRecStartTick = cv::getTickCount();
-}
-
-void MainWindow::on_pushButton_SignUp_clicked()
-{
-    if(m_faceROI.empty())
-        return;
-    
-    m_timer->stop();
-    
-    //创建登记窗口
-    SignUpDialog *signUpDlg = new SignUpDialog();
-    //登记窗口打开时停止其他窗口的运行
-    signUpDlg->setWindowModality(Qt::ApplicationModal);
-    //信息传递
-    connect(signUpDlg, SIGNAL(sendData(bool, std::string)), this, SLOT(addFace(bool, std::string)));
-    
-    //m_alignment.alignFace(m_frameSrc,m_faceRect,m_faceROI);
-    signUpDlg->setImg(m_faceROI);
-    signUpDlg->show();
-    signUpDlg->exec();
-    
-    delete signUpDlg;
-    
-    m_timer->start();
 }
 
 void MainWindow::addFace(bool isSignUp, std::string name)

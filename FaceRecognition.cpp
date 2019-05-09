@@ -91,9 +91,9 @@ bool FaceRecognition::recognize(const cv::Mat &faceImg, std::string &name)
     return true;
 }
 
-bool FaceRecognition::recognize(const cv::Mat &faceImg, int n, std::vector<std::string> &names)
+bool FaceRecognition::recognize(const cv::Mat &faceImg, int n, std::map<float,std::string> &nameScores)
 {
-    m_eieModel.queryFace(faceImg,n,names);
+    m_eieModel.queryFace(faceImg,n,nameScores);
     
     return true;
 }

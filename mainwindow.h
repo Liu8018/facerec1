@@ -43,6 +43,7 @@ private:
     QTimer *m_timer = new QTimer(this);
     
     void showMat();
+    void showNames(std::map<float,std::string> nameScores);
     
     bool m_isDoFaceRec;
     float m_faceRecStartTick;

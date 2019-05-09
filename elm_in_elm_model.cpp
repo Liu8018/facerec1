@@ -397,7 +397,21 @@ void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, std::string &label)
     query(gray,label);
 }
 
-void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string> &labels)
+void myNormalize(cv::Mat &mat)
+{
+    for(int i=0;i<mat.rows;i++)
+        for(int j=0;j<mat.cols;j++)
+        {
+            float val = mat.at<float>(i,j);
+            
+            if(val < 0)
+                mat.at<float>(i,j) = 0.5/(1.0-val);
+            else
+                mat.at<float>(i,j) = 1.0 - 0.5/(1.0 + val);
+        }
+}
+
+void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::map<float,std::string> &nameScores)
 {
     if(m_F.empty())
         return;
@@ -414,19 +428,15 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
     }
     
     cv::Mat output = H * m_F;
+    //std::cout<<output<<std::endl;
+    myNormalize(output);
+    //std::cout<<output<<std::endl;
     
-    //std::cout<<"output:\n"<<output<<std::endl;
-    
-    std::vector<int> ids;
-    getMaxNId(output,n,ids);
-    
-    //for(int i=0;i<n;i++)
-    //    std::cout<<"ids["<<i<<"]:"<<ids[i]<<std::endl;
-    
-    labels.resize(n);
-    
+    //赋值
     for(int i=0;i<n;i++)
-        labels[i].assign(m_label_string[ids[i]]);
+        nameScores.insert(std::pair<float,std::string>(output.at<float>(0,i),m_label_string[i]));
+    
+    //std::sort()
     
     /*
     //test
@@ -457,7 +467,7 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
     */
 }
 
-void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::vector<std::string> &labels)
+void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::map<float,std::string> &nameScores)
 {
     cv::Mat gray;
     if(mat.channels() == 3)
@@ -467,7 +477,7 @@ void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::vector<std::str
     
     cv::resize(gray,gray,cv::Size(m_width,m_height));
     
-    query(gray,n,labels);
+    query(gray,n,nameScores);
 }
 
 void ELM_IN_ELM_Model::clearTrainData()
