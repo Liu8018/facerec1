@@ -43,14 +43,14 @@ void FaceAlignment::drawShape(cv::Mat &img, dlib::full_object_detection shape)
 
 void modifyROI(const cv::Size imgSize, cv::Rect &rect)
 {
-    if(rect.br().x > imgSize.width-1)
-        rect.width = imgSize.width-1-rect.x;
-    if(rect.br().y > imgSize.height-1)
-        rect.height = imgSize.height-1-rect.y;
     if(rect.x < 0)
         rect.x = 0;
     if(rect.y < 0)
         rect.y = 0;
+    if(rect.br().x > imgSize.width-1)
+        rect.width = imgSize.width-1-rect.x;
+    if(rect.br().y > imgSize.height-1)
+        rect.height = imgSize.height-1-rect.y;
 }
 
 void modifyRectByFacePt(const dlib::full_object_detection &shape, cv::Rect &rect)

@@ -114,7 +114,7 @@ void handleFaceDb(int method)
             
             cv::Rect faceRect;
             if(objects.empty())
-                faceRect = cv::Rect(0,0,image.cols,image.rows);
+                faceRect = cv::Rect(0,0,image.cols-1,image.rows-1);
             else
                 faceRect = objects[0];
             
