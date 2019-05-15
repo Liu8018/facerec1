@@ -63,8 +63,8 @@ cv::Mat PCA_Face::asRowMatrix(const std::vector<cv::Mat>& src, int rtype, double
 
 void PCA_Face::calc(std::vector<cv::Mat> &faces)
 {
-    //if(!m_pca.eigenvalues.empty())
-    //    return;
+    if(!m_pca.eigenvalues.empty())
+        return;
     
     cv::Mat data = asRowMatrix(faces, CV_32FC1);//Q*MN
     //std::cout<<data.size<<std::endl;

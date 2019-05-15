@@ -36,6 +36,7 @@ private:
     
     FaceRecognition m_rec;
     cv::Mat m_faceROI;
+    cv::Mat m_faceROI_src;
     
     cv::Rect m_faceRect;
     

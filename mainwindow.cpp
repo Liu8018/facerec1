@@ -55,7 +55,7 @@ void MainWindow::on_pushButton_Recognize_clicked()
 
 void MainWindow::on_pushButton_SignUp_clicked()
 {
-    if(m_faceROI.empty())
+    if(m_faceROI_src.empty())
         return;
     
     m_timer->stop();
@@ -67,8 +67,7 @@ void MainWindow::on_pushButton_SignUp_clicked()
     //信息传递
     connect(signUpDlg, SIGNAL(sendData(bool, std::string)), this, SLOT(addFace(bool, std::string)));
     
-    //m_alignment.alignFace(m_frameSrc,m_faceRect,m_faceROI);
-    signUpDlg->setImg(m_faceROI);
+    signUpDlg->setImg(m_faceROI_src);
     signUpDlg->show();
     signUpDlg->exec();
     
@@ -147,11 +146,12 @@ void MainWindow::updateFrame()
         //人脸对齐
         m_alignment.alignFace(m_frameSrc,objects[0],m_faceROI);
         m_faceRect = objects[0];
+        m_faceROI_src = m_frameSrc(m_faceRect);
         
         cv::cvtColor(m_faceROI,m_faceROI,cv::COLOR_BGR2GRAY);
         //cv::imshow("m_faceROI",m_faceROI);
         cv::equalizeHist(m_faceROI,m_faceROI);
-        //cv::imshow("m_faceROI_eq",m_faceROI);
+        cv::imshow("m_faceROI_eq",m_faceROI);
         
         //绘制检测结果
         cv::rectangle(m_frame,objects[0],cv::Scalar(0,255,255),2);
@@ -236,12 +236,12 @@ void MainWindow::addFace(bool isSignUp, std::string name)
         filename += name+std::string(strTime) + ".png";
     }
     
-    markImg(m_faceROI);
-    cv::imwrite(filename,m_faceROI);
+    markImg(m_faceROI_src);
+    cv::imwrite(filename,m_faceROI_src);
     if(isEmptyRun)
     {
         filename = "./data/face_database/" + name + "/" + name + "2.png";
-        cv::imwrite(filename,m_faceROI);
+        cv::imwrite(filename,m_faceROI_src);
         isEmptyRun = false;
     }
     
