@@ -21,6 +21,8 @@ public:
     
     void drawShape(cv::Mat &img, dlib::full_object_detection shape);
     
+    void extract_highdim_lbp_features(const cv::Mat &faceMat, std::vector<float> &feats);
+    
 private:
     dlib::shape_predictor m_shapePredictor;
     

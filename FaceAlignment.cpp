@@ -19,7 +19,7 @@ void FaceAlignment::dlibPoint2cvPoint(const dlib::full_object_detection &S, std:
 void FaceAlignment::getShape(const cv::Mat &inputImg, const cv::Rect &faceRect, dlib::full_object_detection &shape)
 {
     //转换opencv图像为dlib图像
-    dlib::cv_image<dlib::rgb_pixel> cimg(inputImg);
+    dlib::cv_image<dlib::bgr_pixel> cimg(inputImg);
 
     //提取脸部特征点(68个),存储在shape
     dlib::rectangle face_dlibRect;
@@ -145,4 +145,16 @@ void FaceAlignment::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::M
     */
     
     resultImg = rotatedImg(faceRect).clone();
+}
+
+void FaceAlignment::extract_highdim_lbp_features(const cv::Mat &faceMat, std::vector<float> &feats)
+{
+		dlib::array2d<unsigned char> c_gray_face;
+		dlib::assign_image(c_gray_face,dlib::cv_image<uchar>(faceMat));
+        
+		dlib::rectangle rect(0,0,faceMat.cols-1,faceMat.rows-1);
+		dlib::full_object_detection shape;
+        getShape(faceMat,rect,shape);
+        
+		dlib::extract_highdim_face_lbp_descriptors(c_gray_face, shape, feats);
 }

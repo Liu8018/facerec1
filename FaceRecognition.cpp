@@ -48,7 +48,7 @@ void FaceRecognition::getDescriptor(const cv::Mat &src, const dlib::full_object_
     cv::cvtColor(src, img, cv::COLOR_BGR2GRAY);
     dlib::array2d<dlib::bgr_pixel> dimg;
     dlib::assign_image(dimg, dlib::cv_image<uchar>(img));
-            
+    
     dlib::matrix<dlib::rgb_pixel> face_chip;
     dlib::extract_image_chip(dimg, dlib::get_face_chip_details(shape,150,0.25), face_chip);
     

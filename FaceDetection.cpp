@@ -7,7 +7,7 @@ FaceDetection::FaceDetection()
 
 void FaceDetection::detect(const cv::Mat &src, std::vector<cv::Rect> &faceRects)
 {
-    dlib::array2d<dlib::rgb_pixel> img;
+    dlib::array2d<dlib::bgr_pixel> img;
     dlib::assign_image(img, dlib::cv_image<dlib::bgr_pixel>(src));
     std::vector<dlib::rectangle> dets = m_ffd(img);
     

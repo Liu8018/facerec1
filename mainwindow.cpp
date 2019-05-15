@@ -160,7 +160,7 @@ void MainWindow::updateFrame()
         {
             std::string name;
             bool isInFaceDb = false;
-            
+             
             if(m_rec.method == "resnet")
             {
                 dlib::full_object_detection shape;
@@ -170,7 +170,7 @@ void MainWindow::updateFrame()
             
             if(m_rec.method == "elm")
             {
-                int n = 3;
+                int n = 5;
                 std::map<float,std::string> nameScores;
                 isInFaceDb = m_rec.recognize(m_faceROI,n,nameScores);
                 
