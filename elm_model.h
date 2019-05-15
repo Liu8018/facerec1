@@ -1,4 +1,4 @@
-#ifndef ELM_MODEL_H
+﻿#ifndef ELM_MODEL_H
 #define ELM_MODEL_H
 
 #include <iostream>
@@ -50,9 +50,9 @@ public:
     //计算在测试数据上的准确率
     float validate();
     
-private:
-    PCA_Face m_pcaFace;
+    PCA_Face pcaFace;
     
+private:
     int m_randomState;
     
     int m_I;  //输入层节点数

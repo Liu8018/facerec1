@@ -102,51 +102,6 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
     */
 }
 
-
-void ELM_IN_ELM_Model::loadFaces(const std::vector<cv::Mat> &faceImgs,
-                                 const std::vector<std::string> &label_string,
-                                 const std::vector<std::vector<bool>> trainLabelBins,
-                                 const int resizeWidth, const int resizeHeight)
-{
-    m_width = resizeWidth;
-    m_height = resizeHeight;
-    m_channels = 1;
-    
-    m_trainImgs.assign(faceImgs.begin(),faceImgs.end());
-    m_label_string.assign(label_string.begin(),label_string.end());
-    m_trainLabelBins.assign(trainLabelBins.begin(),trainLabelBins.end());
-    
-    for(int i=0;i<m_trainImgs.size();i++)
-        cv::resize(m_trainImgs[i],m_trainImgs[i],cv::Size(m_width,m_height));
-    for(int i=0;i<m_testImgs.size();i++)
-        cv::resize(m_testImgs[i],m_testImgs[i],cv::Size(m_width,m_height));
-    
-    /*
-    getAverageImg(m_trainImgs,m_averageFace);
-    minusAverage(m_averageFace,m_trainImgs);
-    minusAverage(m_averageFace,m_testImgs);
-    */
-    
-    m_C = m_label_string.size();
-    m_Q = m_trainImgs.size();
-    
-    /*
-    //提取输入图像的lbp特征
-    for(int i=0;i<m_trainImgs.size();i++)
-    {
-        cv::Mat lbp;
-        LBP81(m_trainImgs[i],lbp);
-        lbp.copyTo(m_trainImgs[i]);
-    }
-    for(int i=0;i<m_testImgs.size();i++)
-    {
-        cv::Mat lbp;
-        LBP81(m_testImgs[i],lbp);
-        lbp.copyTo(m_testImgs[i]);
-    }
-    */
-}
-
 void ELM_IN_ELM_Model::loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle)
 {
     loadMnistData_csv(path,trainSampleRatio,
@@ -165,6 +120,10 @@ void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating, bool verbose
     {
         m_subModelToTrain.inputData_2d(m_trainImgs,m_trainLabelBins,m_width,m_height,m_channels);
         m_subModelToTrain.inputData_2d_test(m_testImgs,m_testLabelBins);
+        
+        if(m_pcaFace.pca.eigenvalues.empty())
+            m_pcaFace = m_subModelToTrain.pcaFace;
+        
         int randomState = (unsigned)time(NULL);
         
         //训练子模型
@@ -331,6 +290,7 @@ void ELM_IN_ELM_Model::save()
     fswrite<<"C"<<m_C;
     fswrite<<"F"<<m_F;
     fswrite<<"label_string"<<m_label_string;
+    m_pcaFace.write("./data/pca/pcaFace.xml");
     
     fswrite.release();
     
@@ -355,6 +315,7 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
     fsread["C"]>>m_C;
     fsread["F"]>>m_F;
     fsread["label_string"]>>m_label_string;
+    m_pcaFace.read("./data/pca/pcaFace.xml");
 
     fsread.release();
     
@@ -411,6 +372,36 @@ void myNormalize(cv::Mat &mat)
         }
 }
 
+void getFileByName_s(std::string path, std::vector<cv::Mat> &imgs)
+{
+    DIR *dir;
+	struct dirent *ptr;
+
+	if(path[path.length()-1] != '/')
+		path = path + "/";
+
+	if((dir = opendir(path.c_str())) == NULL)
+	{
+		std::cout<<"open the dir: "<< path <<" error!" <<std::endl;
+		return;
+	}
+	
+	while((ptr=readdir(dir)) !=NULL )
+	{
+        if(strcmp(ptr->d_name,".")==0 || strcmp(ptr->d_name,"..")==0) 
+            continue; 
+		else if(ptr->d_type == 8) //file
+		{
+			std::string fn(ptr->d_name);
+			std::string p = path + fn;
+            
+            imgs.push_back(cv::imread(p,0));
+		}
+    }
+    
+    closedir(dir);
+}
+
 void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::map<float,std::string> &nameScores)
 {
     if(m_F.empty())
@@ -428,43 +419,48 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::map<float,std::stri
     }
     
     cv::Mat output = H * m_F;
-    //std::cout<<output<<std::endl;
-    myNormalize(output);
-    //std::cout<<output<<std::endl;
     
-    //赋值
+    std::vector<int> maxIds;
+    getMaxNId(output,n,maxIds);
+    
+    //用pca算相似度
+    cv::Mat om;
+    m_pcaFace.reduceDim(mat,om);
     for(int i=0;i<n;i++)
-        nameScores.insert(std::pair<float,std::string>(output.at<float>(0,i),m_label_string[i]));
-    
-    //std::sort()
-    
-    /*
-    //test
-    std::cout<<"[output begin]-------------------------------------"<<std::endl;
-    for(int i=0;i<m_C;i++)
-        std::cout<<"name:"<<m_label_string[i]<<" score:"<<output.at<float>(0,i)<<std::endl;
-    std::cout<<"----------------------------------"<<std::endl;
-    
-    //计算欧氏距离前的处理。
-    normalize(output);
-    output /= cv::norm(output);
-    
-    for(int i=0;i<m_C;i++)
-        std::cout<<"name:"<<m_label_string[i]<<" score:"<<output.at<float>(0,i)<<std::endl;
-    std::cout<<"----------------------------------"<<std::endl;
-    
-    //与每个种类的标准输出分别计算欧氏距离
-    std::vector<float> diffs(m_C);
-    for(int c=0;c<m_C;c++)
     {
-        output.at<float>(0,c) -= 1;
-        diffs[c] = cv::norm(output);
+        int id = maxIds[i];        
+        std::string name = m_label_string[id];
+        
+        float similarity = -1;
+        
+        std::vector<cv::Mat> dbImgs;
+        getFileByName_s("./data/face_database/"+name,dbImgs);
+        
+        for(int j=0;j<dbImgs.size();j++)
+        {
+            cv::Mat prj;
+            cv::resize(dbImgs[j],dbImgs[j],cv::Size(m_width,m_height));
+            m_pcaFace.reduceDim(dbImgs[j],prj);
+            
+            float a = cv::norm(om);
+            float b = cv::norm(prj);
+            float c = cv::norm(om - prj);
+            
+            float sim = (a*a+b*b-c*c)/(2*a*b);
+            
+            if(similarity == -1)
+                similarity = sim;
+            else
+            {
+                if(sim < similarity)
+                    similarity = sim;
+            }
+        }
+        
+        //赋值并自动排序
+        nameScores.insert(std::pair<float,std::string>(similarity,name));
     }
     
-    for(int i=0;i<m_C;i++)
-        std::cout<<"name:"<<m_label_string[i]<<" diff:"<<diffs[i]<<std::endl;
-    std::cout<<"[output end]-------------------------------------\n"<<std::endl;
-    */
 }
 
 void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::map<float,std::string> &nameScores)

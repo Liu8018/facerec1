@@ -18,12 +18,14 @@ public:
     cv::Mat asRowMatrix(const std::vector<cv::Mat>& src, int rtype, double alpha = 1, double beta = 0);
     
     void reduceDim(const std::vector<cv::Mat> &faceImgs, cv::Mat &outputData);
+    void reduceDim(const cv::Mat &faceImg, cv::Mat &outputData);
     
     void read(std::string path);
     void write(std::string path);
     
+    cv::PCA pca;
+    
 private:
-    cv::PCA m_pca;
 };
 
 #endif // PCA_H

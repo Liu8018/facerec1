@@ -13,6 +13,10 @@ void markImg(cv::Mat &img);
 //检测图片是否已被打上标记
 bool isMarkedImg(const cv::Mat &img);
 
+//获取标准文件夹格式下的文件
+void getFiles(std::string path, std::map<std::string, std::string> &files);
+void getFileByName(std::string path, std::vector<cv::Mat> &imgs);
+
 
 
 #endif // FUNCTIONS2_H

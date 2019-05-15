@@ -63,28 +63,36 @@ cv::Mat PCA_Face::asRowMatrix(const std::vector<cv::Mat>& src, int rtype, double
 
 void PCA_Face::calc(std::vector<cv::Mat> &faces)
 {
-    if(!m_pca.eigenvalues.empty())
-        return;
+    //if(!pca.eigenvalues.empty())
+    //    return;
     
     cv::Mat data = asRowMatrix(faces, CV_32FC1);//Q*MN
     //std::cout<<data.size<<std::endl;
-    m_pca = cv::PCA(data, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
+    pca = cv::PCA(data, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
 }
 
 void PCA_Face::reduceDim(const std::vector<cv::Mat> &faceImgs, cv::Mat &outputData)
 {
     cv::Mat data = asRowMatrix(faceImgs, CV_32FC1);
-    m_pca.project(data,outputData);
+    pca.project(data,outputData);
+}
+
+void PCA_Face::reduceDim(const cv::Mat &faceImg, cv::Mat &outputData)
+{
+    std::vector<cv::Mat> tmpImgs;
+    tmpImgs.push_back(faceImg);
+    
+    reduceDim(tmpImgs,outputData);
 }
 
 void PCA_Face::write(std::string path)
 {
     cv::FileStorage fswrite(path,cv::FileStorage::WRITE);
-    m_pca.write(fswrite);
+    pca.write(fswrite);
 }
 
 void PCA_Face::read(std::string path)
 {
     cv::FileStorage fsread(path,cv::FileStorage::READ);
-    m_pca.read(fsread.root());
+    pca.read(fsread.root());
 }

@@ -23,11 +23,6 @@ public:
     
     void loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle=true);
     
-    void loadFaces(const std::vector<cv::Mat> &faceImgs, 
-                   const std::vector<std::string> &label_string, 
-                   const std::vector<std::vector<bool> > trainLabelBins, 
-                   const int resizeWidth, const int resizeHeight);
-    
     void fitSubModels(int batchSize = -1, bool validating = true, bool verbose = true);
     void fitMainModel(int batchSize = -1, bool validating = true, bool verbose = true);
     
@@ -50,6 +45,8 @@ public:
     float validate();
     
 private:
+    PCA_Face m_pcaFace;
+    
     int m_n_models;
     std::vector<int> m_subModelHiddenNodes;
     

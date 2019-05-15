@@ -151,7 +151,7 @@ void MainWindow::updateFrame()
         cv::cvtColor(m_faceROI,m_faceROI,cv::COLOR_BGR2GRAY);
         //cv::imshow("m_faceROI",m_faceROI);
         cv::equalizeHist(m_faceROI,m_faceROI);
-        cv::imshow("m_faceROI_eq",m_faceROI);
+        //cv::imshow("m_faceROI_eq",m_faceROI);
         
         //绘制检测结果
         cv::rectangle(m_frame,objects[0],cv::Scalar(0,255,255),2);
@@ -170,7 +170,7 @@ void MainWindow::updateFrame()
             
             if(m_rec.method == "elm")
             {
-                int n = 5;
+                int n = 3;
                 std::map<float,std::string> nameScores;
                 isInFaceDb = m_rec.recognize(m_faceROI,n,nameScores);
                 

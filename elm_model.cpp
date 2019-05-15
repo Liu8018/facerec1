@@ -41,9 +41,9 @@ void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
     //mats2lines(mats,m_inputLayerData,m_channels);
     //std::cout<<"calculating pca..."<<std::endl;
-    m_pcaFace.calc(mats);
+    pcaFace.calc(mats);
     //std::cout<<"pca calculated"<<std::endl;
-    m_pcaFace.reduceDim(mats,m_inputLayerData);
+    pcaFace.reduceDim(mats,m_inputLayerData);
     //normalize_img(m_inputLayerData);
     normalize(m_inputLayerData);
     
@@ -68,7 +68,7 @@ void ELM_Model::inputData_2d_test(std::vector<cv::Mat> &mats, const std::vector<
     for(int i=0;i<mats.size();i++)
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
     //mats2lines(mats,m_inputLayerData_test,m_channels);
-    m_pcaFace.reduceDim(mats,m_inputLayerData_test);
+    pcaFace.reduceDim(mats,m_inputLayerData_test);
     //normalize_img(m_inputLayerData_test);
     normalize(m_inputLayerData_test);
 }
@@ -260,7 +260,7 @@ void ELM_Model::query(const cv::Mat &mat, cv::Mat &output)
     //mat2line(tmpImg,inputLine,m_channels);
     std::vector<cv::Mat> mats;
     mats.push_back(mat);
-    m_pcaFace.reduceDim(mats,inputLine);
+    pcaFace.reduceDim(mats,inputLine);
     
     //debug
     //std::cout<<"inputLine:\n"<<inputLine<<std::endl;
@@ -290,7 +290,7 @@ void ELM_Model::batchQuery(std::vector<cv::Mat> &inputMats, cv::Mat &outputMat)
         cv::resize(inputMats[i],inputMats[i],cv::Size(m_width,m_height));
     
     cv::Mat inputLayerData;//(cv::Size(m_width*m_height*m_channels,inputMats.size()),CV_32F);
-    m_pcaFace.reduceDim(inputMats,inputLayerData);
+    pcaFace.reduceDim(inputMats,inputLayerData);
     normalize(inputLayerData);
 
     cv::Mat H = inputLayerData * m_W_IH;
@@ -316,7 +316,7 @@ void ELM_Model::save(std::string path, std::string K_path)
     fswrite<<"B_H"<<m_B_H;
     fswrite<<"activationMethod"<<m_activationMethod;
     fswrite<<"label_string"<<m_label_string;
-    m_pcaFace.write("./data/pca/pcaFace.xml");
+    pcaFace.write("./data/pca/pcaFace.xml");
     
     if(K_path != "")
     {
@@ -341,7 +341,7 @@ void ELM_Model::load(std::string path, std::string K_path)
     fsread["B_H"]>>m_B_H;
     fsread["activationMethod"]>>m_activationMethod;
     fsread["label_string"]>>m_label_string;
-    m_pcaFace.read("./data/pca/pcaFace.xml");
+    pcaFace.read("./data/pca/pcaFace.xml");
     
     if(K_path != "")
     {
