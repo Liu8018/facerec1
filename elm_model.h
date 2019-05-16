@@ -50,8 +50,6 @@ public:
     //计算在测试数据上的准确率
     float validate();
     
-    PCA_Face pcaFace;
-    
 private:
     int m_randomState;
     

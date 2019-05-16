@@ -32,4 +32,6 @@ public:
 private:
 };
 
+extern PCA_Face pcaFace;
+
 #endif // PCA_H

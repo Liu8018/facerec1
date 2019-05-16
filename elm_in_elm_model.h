@@ -45,8 +45,12 @@ public:
     //计算在测试数据上的准确率
     float validate();
     
+    void calcFeats();
+    void writeFeats();
+    void readFeats();
+    
 private:
-    PCA_Face m_pcaFace;
+    std::vector<std::vector<cv::Mat>> m_allFeats;
     
     int m_n_models;
     std::vector<int> m_subModelHiddenNodes;

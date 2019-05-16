@@ -121,9 +121,6 @@ void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating, bool verbose
         m_subModelToTrain.inputData_2d(m_trainImgs,m_trainLabelBins,m_width,m_height,m_channels);
         m_subModelToTrain.inputData_2d_test(m_testImgs,m_testLabelBins);
         
-        if(m_pcaFace.pca.eigenvalues.empty())
-            m_pcaFace = m_subModelToTrain.pcaFace;
-        
         int randomState = (unsigned)time(NULL);
         
         //训练子模型
@@ -290,13 +287,16 @@ void ELM_IN_ELM_Model::save()
     fswrite<<"C"<<m_C;
     fswrite<<"F"<<m_F;
     fswrite<<"label_string"<<m_label_string;
-    m_pcaFace.write("./data/pca/pcaFace.xml");
+    pcaFace.write("./data/pca/pcaFace.xml");
     
     fswrite.release();
     
     cv::FileStorage K_fswrite(m_modelPath+"mainK.xml",cv::FileStorage::WRITE);
     K_fswrite<<"K"<<m_K;
     K_fswrite.release();
+    
+    if(!m_allFeats.empty())
+        writeFeats();
 }
 
 void ELM_IN_ELM_Model::load(std::string modelDir)
@@ -315,7 +315,7 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
     fsread["C"]>>m_C;
     fsread["F"]>>m_F;
     fsread["label_string"]>>m_label_string;
-    m_pcaFace.read("./data/pca/pcaFace.xml");
+    pcaFace.read("./data/pca/pcaFace.xml");
 
     fsread.release();
     
@@ -328,6 +328,9 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
     for(int m=0;m<m_n_models;m++)
         m_subModels[m].load(m_modelPath+"subModel"+std::to_string(m)+".xml",
                             m_modelPath+"subK"+std::to_string(m)+".xml");
+    
+    if(access("./data/face_database/lbpFeats.dat",F_OK) != -1)
+        readFeats();
 }
 
 void ELM_IN_ELM_Model::query(const cv::Mat &mat, std::string &label)
@@ -423,9 +426,12 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::map<float,std::stri
     std::vector<int> maxIds;
     getMaxNId(output,n,maxIds);
     
-    //用pca算相似度
+    //相似度计算
     cv::Mat om;
-    m_pcaFace.reduceDim_face(mat,om);
+    pcaFace.reduceDim_face(mat,om);
+    
+    float a = cv::norm(om);
+    
     for(int i=0;i<n;i++)
     {
         int id = maxIds[i];        
@@ -433,24 +439,16 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::map<float,std::stri
         
         float similarity = -1;
         
-        std::vector<cv::Mat> dbImgs;
-        getFileByName_s("./data/face_database/"+name,dbImgs);
-        
-        for(int j=0;j<dbImgs.size();j++)
+        for(int j=0;j<m_allFeats[id].size();j++)
         {
-            cv::Mat prj;
-            cv::resize(dbImgs[j],dbImgs[j],cv::Size(m_width,m_height));
-            m_pcaFace.reduceDim_face(dbImgs[j],prj);
-            
             /*
             std::cout<<"om:\n"<<om<<std::endl;
             std::cout<<"prj:\n"<<prj<<std::endl;
             std::cout<<"om - prj:\n"<<om - prj<<std::endl;
             */
             
-            float a = cv::norm(om);
-            float b = cv::norm(prj);
-            float c = cv::norm(om - prj);
+            float b = cv::norm(m_allFeats[id][j]);
+            float c = cv::norm(om - m_allFeats[id][j]);
             
             float sim = (a*a+b*b-c*c)/(2*a*b);
             
@@ -469,6 +467,49 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::map<float,std::stri
         nameScores.insert(std::pair<float,std::string>(similarity,name));
     }
     
+}
+
+void ELM_IN_ELM_Model::calcFeats()
+{
+    m_allFeats.clear();
+    
+    for(int i=0;i<m_C;i++)
+    {
+        std::vector<cv::Mat> nameFeats;
+        
+        std::string name = m_label_string[i];
+        
+        std::vector<cv::Mat> dbImgs;
+        getFileByName_s("./data/face_database/"+name,dbImgs);
+        
+        for(int j=0;j<dbImgs.size();j++)
+        {
+            cv::Mat prj;
+            cv::resize(dbImgs[j],dbImgs[j],cv::Size(m_width,m_height));
+            pcaFace.reduceDim_face(dbImgs[j],prj);
+            
+            nameFeats.push_back(prj);
+        }
+        
+        m_allFeats.push_back(nameFeats);
+    }
+}
+void ELM_IN_ELM_Model::writeFeats()
+{
+    cv::FileStorage fswrite("./data/face_database/lbpFeats.dat",cv::FileStorage::WRITE);
+    
+    fswrite<<"allFeats"<<m_allFeats;
+    
+    fswrite.release();
+}
+
+void ELM_IN_ELM_Model::readFeats()
+{
+    cv::FileStorage fsread("./data/face_database/lbpFeats.dat",cv::FileStorage::READ);
+    
+    fsread["allFeats"]>>m_allFeats;
+    
+    fsread.release();
 }
 
 void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::map<float,std::string> &nameScores)

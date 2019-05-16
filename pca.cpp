@@ -1,5 +1,7 @@
 #include "pca.h"
 
+PCA_Face pcaFace;
+
 PCA_Face::PCA_Face()
 {
     
@@ -76,7 +78,7 @@ void getLbpData(const std::vector<cv::Mat> &faces, cv::Mat &data)
     vectors2mat(feats,data);
 }
 
-#define USE_HIGHDIM_LBP 0
+#define USE_HIGHDIM_LBP 1
 
 void PCA_Face::calc_face(std::vector<cv::Mat> &faces)
 {
@@ -113,6 +115,9 @@ void PCA_Face::reduceDim_face(const cv::Mat &faceImg, cv::Mat &output)
 
 void PCA_Face::calc_feat(std::vector<std::vector<float>> &feats)
 {
+    if(!pca.eigenvalues.empty())
+        return;
+    
     cv::Mat data;
     vectors2mat(feats,data);
     
