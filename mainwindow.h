@@ -32,8 +32,6 @@ private:
     
     FaceDetection m_detection;
     
-    FaceAlignment m_alignment;
-    
     FaceRecognition m_rec;
     cv::Mat m_faceROI;
     cv::Mat m_faceROI_src;

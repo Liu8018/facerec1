@@ -144,13 +144,13 @@ void MainWindow::updateFrame()
     if(!objects.empty())
     {
         //人脸对齐
-        m_alignment.alignFace(m_frameSrc,objects[0],m_faceROI);
+        alignment.alignFace(m_frameSrc,objects[0],m_faceROI);
         m_faceRect = objects[0];
         m_faceROI_src = m_frameSrc(m_faceRect);
         
         cv::cvtColor(m_faceROI,m_faceROI,cv::COLOR_BGR2GRAY);
         //cv::imshow("m_faceROI",m_faceROI);
-        cv::equalizeHist(m_faceROI,m_faceROI);
+        equalizeIntensity(m_faceROI);
         //cv::imshow("m_faceROI_eq",m_faceROI);
         
         //绘制检测结果
@@ -164,7 +164,7 @@ void MainWindow::updateFrame()
             if(m_rec.method == "resnet")
             {
                 dlib::full_object_detection shape;
-                m_alignment.getShape(m_frameSrc,objects[0],shape);
+                alignment.getShape(m_frameSrc,objects[0],shape);
                 isInFaceDb = m_rec.recognize(m_frameSrc,shape,name);
             }
             

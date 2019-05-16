@@ -68,12 +68,12 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
     for(int i=0;i<m_trainImgs.size();i++)
     {
         cv::resize(m_trainImgs[i],m_trainImgs[i],cv::Size(m_width,m_height));
-        cv::equalizeHist(m_trainImgs[i],m_trainImgs[i]);
+        equalizeIntensity(m_trainImgs[i]);
     }
     for(int i=0;i<m_testImgs.size();i++)
     {
         cv::resize(m_testImgs[i],m_testImgs[i],cv::Size(m_width,m_height));
-        cv::equalizeHist(m_testImgs[i],m_testImgs[i]);
+        equalizeIntensity(m_testImgs[i]);
     }
     
     /*
@@ -425,7 +425,7 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::map<float,std::stri
     
     //用pca算相似度
     cv::Mat om;
-    m_pcaFace.reduceDim(mat,om);
+    m_pcaFace.reduceDim_face(mat,om);
     for(int i=0;i<n;i++)
     {
         int id = maxIds[i];        
@@ -440,13 +440,21 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::map<float,std::stri
         {
             cv::Mat prj;
             cv::resize(dbImgs[j],dbImgs[j],cv::Size(m_width,m_height));
-            m_pcaFace.reduceDim(dbImgs[j],prj);
+            m_pcaFace.reduceDim_face(dbImgs[j],prj);
+            
+            /*
+            std::cout<<"om:\n"<<om<<std::endl;
+            std::cout<<"prj:\n"<<prj<<std::endl;
+            std::cout<<"om - prj:\n"<<om - prj<<std::endl;
+            */
             
             float a = cv::norm(om);
             float b = cv::norm(prj);
             float c = cv::norm(om - prj);
             
             float sim = (a*a+b*b-c*c)/(2*a*b);
+            
+            //std::cout<<name<<": "<<sim<<std::endl;
             
             if(similarity == -1)
                 similarity = sim;
@@ -465,15 +473,17 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::map<float,std::stri
 
 void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, int n, std::map<float,std::string> &nameScores)
 {
+    /*
     cv::Mat gray;
     if(mat.channels() == 3)
         cv::cvtColor(mat,gray,cv::COLOR_BGR2GRAY);
     else
         mat.copyTo(gray);
+    */
     
-    cv::resize(gray,gray,cv::Size(m_width,m_height));
-    
-    query(gray,n,nameScores);
+    cv::Mat mat2;
+    cv::resize(mat,mat2,cv::Size(m_width,m_height));
+    query(mat2,n,nameScores);
 }
 
 void ELM_IN_ELM_Model::clearTrainData()

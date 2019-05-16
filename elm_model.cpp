@@ -40,11 +40,10 @@ void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::
     for(int i=0;i<mats.size();i++)
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
     //mats2lines(mats,m_inputLayerData,m_channels);
-    //std::cout<<"calculating pca..."<<std::endl;
-    pcaFace.calc(mats);
-    //std::cout<<"pca calculated"<<std::endl;
-    pcaFace.reduceDim(mats,m_inputLayerData);
-    //normalize_img(m_inputLayerData);
+    
+    pcaFace.calc_face(mats);
+    pcaFace.reduceDim_face(mats,m_inputLayerData);
+    
     normalize(m_inputLayerData);
     
     //确定输入层节点数
@@ -68,8 +67,9 @@ void ELM_Model::inputData_2d_test(std::vector<cv::Mat> &mats, const std::vector<
     for(int i=0;i<mats.size();i++)
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
     //mats2lines(mats,m_inputLayerData_test,m_channels);
-    pcaFace.reduceDim(mats,m_inputLayerData_test);
-    //normalize_img(m_inputLayerData_test);
+    
+    pcaFace.reduceDim_face(mats,m_inputLayerData_test);
+    
     normalize(m_inputLayerData_test);
 }
 
@@ -258,9 +258,7 @@ void ELM_Model::query(const cv::Mat &mat, cv::Mat &output)
     //cv::imshow("input img",tmpImg);
     
     //mat2line(tmpImg,inputLine,m_channels);
-    std::vector<cv::Mat> mats;
-    mats.push_back(mat);
-    pcaFace.reduceDim(mats,inputLine);
+    pcaFace.reduceDim_face(mat,inputLine);
     
     //debug
     //std::cout<<"inputLine:\n"<<inputLine<<std::endl;
@@ -290,7 +288,7 @@ void ELM_Model::batchQuery(std::vector<cv::Mat> &inputMats, cv::Mat &outputMat)
         cv::resize(inputMats[i],inputMats[i],cv::Size(m_width,m_height));
     
     cv::Mat inputLayerData;//(cv::Size(m_width*m_height*m_channels,inputMats.size()),CV_32F);
-    pcaFace.reduceDim(inputMats,inputLayerData);
+    pcaFace.reduceDim_face(inputMats,inputLayerData);
     normalize(inputLayerData);
 
     cv::Mat H = inputLayerData * m_W_IH;

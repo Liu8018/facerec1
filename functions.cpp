@@ -46,9 +46,7 @@ void handleFaceDb(int method)
         
         //人脸检测初始化
         FaceDetection detection;
-        //人脸对齐初始化
-        FaceAlignment alignment;
-        
+
         //对库中图像进行人脸检测并裁剪、对齐
         for(std::map<std::string, std::string>::iterator it = files.begin(); it != files.end(); it++  )
         {
@@ -81,7 +79,7 @@ void handleFaceDb(int method)
             //cv::waitKey();
             
             //输出
-            markImg(resultImg);
+            markImg(resultImg);//给处理过的图片打上标记，防止重复处理
             std::string outFile = it->first;
             outFile = outFile.substr(0,outFile.find_last_of("."));
             outFile += ".png";//jpg编码存取数据不一致，必须转成png格式

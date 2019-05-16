@@ -21,7 +21,7 @@ public:
     
     void drawShape(cv::Mat &img, dlib::full_object_detection shape);
     
-    void extract_highdim_lbp_features(const cv::Mat &faceMat, std::vector<float> &feats);
+    void extract_highdim_lbp_features(const cv::Mat &faceMat, std::vector<float> &feat);
     
 private:
     dlib::shape_predictor m_shapePredictor;
@@ -29,5 +29,7 @@ private:
     void cvRect2dlibRect(const cv::Rect &cvRec, dlib::rectangle& dlibRec);
     void dlibPoint2cvPoint(const dlib::full_object_detection &S, std::vector<cv::Point> &L);
 };
+
+extern FaceAlignment alignment;
 
 #endif // FACEALIGNMENT_H

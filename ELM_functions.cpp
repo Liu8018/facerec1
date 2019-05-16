@@ -281,7 +281,7 @@ void sigmoid(cv::Mat &H)
             H.at<float>(i,j) = 1.0 / ( 1.0 + std::exp(-H.at<float>(i,j)) );
 }
 
-//归一化
+//归一化(0-1)
 void normalize(cv::Mat &mat)
 {
     double minVal,maxVal;

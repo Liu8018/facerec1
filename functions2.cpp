@@ -142,3 +142,26 @@ void getFileByName(std::string path, std::vector<cv::Mat> &imgs)
     
     closedir(dir);
 }
+
+void equalizeIntensity(cv::Mat &img)
+{
+    if(img.channels() == 3)
+    {
+        cv::Mat ycrcb;
+
+        cv::cvtColor(img,ycrcb,cv::COLOR_BGR2YCrCb);
+
+        std::vector<cv::Mat> channels;
+        cv::split(ycrcb,channels);
+
+        cv::equalizeHist(channels[0], channels[0]);
+
+        cv::merge(channels,ycrcb);
+
+        cv::cvtColor(ycrcb,img,cv::COLOR_YCrCb2BGR);
+    }
+    else
+    {
+        cv::equalizeHist(img,img);
+    }
+}

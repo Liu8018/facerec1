@@ -3,6 +3,7 @@
 
 #include "elm_model.h"
 #include <map>
+#include "functions2.h"
 
 class ELM_IN_ELM_Model
 {

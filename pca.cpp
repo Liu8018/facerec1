@@ -37,18 +37,6 @@ cv::Mat PCA_Face::asRowMatrix(const std::vector<cv::Mat>& src, int rtype, double
     //拷贝数据
     for(int i = 0; i < n; i++)
         {
-
-        if(src[i].empty()) 
-            {
-            std::string error_message = cv::format("Image number %d was empty, please check your input data.", i);
-            //CV_Error(CV_StsBadArg, error_message);
-            }
-        // 确保数据能被reshape
-        if(src[i].total() != d) 
-            {
-            std::string error_message = cv::format("Wrong number of elements in matrix #%d! Expected %d was %d.", i, d, src[i].total());
-            //CV_Error(CV_StsBadArg, error_message);
-            }
         cv::Mat xi = data.row(i);
         //转化为1行，n列的格式
         if(src[i].isContinuous())
@@ -61,28 +49,90 @@ cv::Mat PCA_Face::asRowMatrix(const std::vector<cv::Mat>& src, int rtype, double
     return data;
 }
 
-void PCA_Face::calc(std::vector<cv::Mat> &faces)
+void vectors2mat(const std::vector<std::vector<float> > &vecs, cv::Mat &mat)
 {
-    //if(!pca.eigenvalues.empty())
-    //    return;
+    if(vecs.empty())
+        return;
     
-    cv::Mat data = asRowMatrix(faces, CV_32FC1);//Q*MN
-    //std::cout<<data.size<<std::endl;
+    int rows = vecs.size();
+    int cols = vecs[0].size();
+    mat.create(cv::Size(cols,rows),CV_32F);
+    
+    for(int i=0;i<vecs.size();i++)
+    {
+        for(int j=0;j<vecs[i].size();j++)
+        {
+            mat.at<float>(i,j) = vecs[i][j];
+        }
+    }
+}
+
+void getLbpData(const std::vector<cv::Mat> &faces, cv::Mat &data)
+{
+    std::vector<std::vector<float>> feats(faces.size());
+    for(int i=0;i<faces.size();i++)
+        alignment.extract_highdim_lbp_features(faces[i],feats[i]);
+    
+    vectors2mat(feats,data);
+}
+
+#define USE_HIGHDIM_LBP 0
+
+void PCA_Face::calc_face(std::vector<cv::Mat> &faces)
+{
+    if(!pca.eigenvalues.empty())
+        return;
+    
+    cv::Mat data;
+    if(USE_HIGHDIM_LBP)
+        getLbpData(faces,data);
+    else
+        data = asRowMatrix(faces, CV_32F);
+    
     pca = cv::PCA(data, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
 }
 
-void PCA_Face::reduceDim(const std::vector<cv::Mat> &faceImgs, cv::Mat &outputData)
+void PCA_Face::reduceDim_face(const std::vector<cv::Mat> &faceImgs, cv::Mat &output)
 {
-    cv::Mat data = asRowMatrix(faceImgs, CV_32FC1);
-    pca.project(data,outputData);
+    cv::Mat data;
+    if(USE_HIGHDIM_LBP)
+        getLbpData(faceImgs,data);
+    else
+        data = asRowMatrix(faceImgs, CV_32F);
+    
+    pca.project(data,output);
 }
 
-void PCA_Face::reduceDim(const cv::Mat &faceImg, cv::Mat &outputData)
+void PCA_Face::reduceDim_face(const cv::Mat &faceImg, cv::Mat &output)
 {
     std::vector<cv::Mat> tmpImgs;
     tmpImgs.push_back(faceImg);
     
-    reduceDim(tmpImgs,outputData);
+    reduceDim_face(tmpImgs,output);
+}
+
+void PCA_Face::calc_feat(std::vector<std::vector<float>> &feats)
+{
+    cv::Mat data;
+    vectors2mat(feats,data);
+    
+    pca = cv::PCA(data, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
+}
+
+void PCA_Face::reduceDim_feat(const std::vector<std::vector<float> > &feats, cv::Mat &output)
+{
+    cv::Mat data;
+    vectors2mat(feats,data);
+    
+    pca.project(data,output);
+}
+
+void PCA_Face::reduceDim_feat(const std::vector<float> &feats, cv::Mat &output)
+{
+    std::vector<std::vector<float>> tmpFeats;
+    tmpFeats.push_back(feats);
+    
+    reduceDim_feat(tmpFeats,output);
 }
 
 void PCA_Face::write(std::string path)

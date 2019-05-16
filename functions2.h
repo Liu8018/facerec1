@@ -17,6 +17,6 @@ bool isMarkedImg(const cv::Mat &img);
 void getFiles(std::string path, std::map<std::string, std::string> &files);
 void getFileByName(std::string path, std::vector<cv::Mat> &imgs);
 
-
+void equalizeIntensity(cv::Mat &img);
 
 #endif // FUNCTIONS2_H

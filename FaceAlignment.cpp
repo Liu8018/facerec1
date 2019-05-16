@@ -1,5 +1,7 @@
 #include "FaceAlignment.h"
 
+FaceAlignment alignment;
+
 FaceAlignment::FaceAlignment()
 {
     dlib::deserialize("./data/shape_predictor/shape_predictor_68_face_landmarks.dat") >> m_shapePredictor;
@@ -25,6 +27,13 @@ void FaceAlignment::getShape(const cv::Mat &inputImg, const cv::Rect &faceRect, 
     dlib::rectangle face_dlibRect;
     cvRect2dlibRect(faceRect,face_dlibRect);
     shape = m_shapePredictor(cimg,face_dlibRect);
+    
+    /*
+    cv::Mat testImg = inputImg.clone();
+    drawShape(testImg,shape);
+    cv::imshow("test",testImg);
+    cv::waitKey();
+    */
 }
 
 void FaceAlignment::drawShape(cv::Mat &img, dlib::full_object_detection shape)
@@ -147,14 +156,24 @@ void FaceAlignment::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::M
     resultImg = rotatedImg(faceRect).clone();
 }
 
-void FaceAlignment::extract_highdim_lbp_features(const cv::Mat &faceMat, std::vector<float> &feats)
+void FaceAlignment::extract_highdim_lbp_features(const cv::Mat &faceMat, std::vector<float> &feat)
 {
-		dlib::array2d<unsigned char> c_gray_face;
-		dlib::assign_image(c_gray_face,dlib::cv_image<uchar>(faceMat));
-        
-		dlib::rectangle rect(0,0,faceMat.cols-1,faceMat.rows-1);
-		dlib::full_object_detection shape;
-        getShape(faceMat,rect,shape);
-        
-		dlib::extract_highdim_face_lbp_descriptors(c_gray_face, shape, feats);
+    //太多重复计算，需要优化
+    //cv::imshow("faceMat",faceMat);
+    //cv::waitKey();
+    
+    cv::Mat faceMat2;
+    if(faceMat.channels() == 1)
+        cv::cvtColor(faceMat,faceMat2,cv::COLOR_GRAY2BGR);
+    else
+        faceMat.copyTo(faceMat2);
+    
+    dlib::array2d<unsigned char> c_gray_face;
+    dlib::assign_image(c_gray_face,dlib::cv_image<dlib::bgr_pixel>(faceMat2));
+    
+    cv::Rect rect(0,0,faceMat2.cols-1,faceMat2.rows-1);
+    dlib::full_object_detection shape;
+    getShape(faceMat2,rect,shape);
+    
+    dlib::extract_highdim_face_lbp_descriptors(c_gray_face, shape, feat);
 }
