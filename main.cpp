@@ -14,7 +14,9 @@ int main(int argc, char *argv[])
     }
 
     if(strArgv == "resnet" || strArgv == "elm")
+    {
         w.setMethod(strArgv);
+    }
     else if(strArgv == "updatedb")
     {
         handleFaceDb(1);

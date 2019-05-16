@@ -12,7 +12,7 @@ void refitEIEModel()
     eieModel.loadStandardFaceDataset(faceDbPath,1,50,50);//超参2:resize大小
     
     for(int i=0;i<nModels;i++)
-        eieModel.setSubModelHiddenNodes(i,100);//超参3:elm隐藏层节点数
+        eieModel.setSubModelHiddenNodes(i,1);//超参3:elm隐藏层节点数
     
     eieModel.fitSubModels();
     eieModel.fitMainModel();

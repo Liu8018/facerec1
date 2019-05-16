@@ -1,5 +1,7 @@
 #include "elm_model.h"
 
+cv::Mat m_inputLayerData;
+
 ELM_Model::ELM_Model()
 {
     m_I = -1;
@@ -43,7 +45,6 @@ void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::
     
     pcaFace.calc_face(mats);
     pcaFace.reduceDim_face(mats,m_inputLayerData);
-    
     normalize(m_inputLayerData);
     
     //确定输入层节点数
@@ -314,7 +315,7 @@ void ELM_Model::save(std::string path, std::string K_path)
     fswrite<<"B_H"<<m_B_H;
     fswrite<<"activationMethod"<<m_activationMethod;
     fswrite<<"label_string"<<m_label_string;
-    pcaFace.write("./data/pca/pcaFace.xml");
+    //pcaFace.write("./data/pca/pcaFace.xml");
     
     if(K_path != "")
     {

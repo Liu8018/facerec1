@@ -78,7 +78,7 @@ void getLbpData(const std::vector<cv::Mat> &faces, cv::Mat &data)
     vectors2mat(feats,data);
 }
 
-#define USE_HIGHDIM_LBP 1
+#define USE_HIGHDIM_LBP 0
 
 void PCA_Face::calc_face(std::vector<cv::Mat> &faces)
 {
@@ -148,6 +148,9 @@ void PCA_Face::write(std::string path)
 
 void PCA_Face::read(std::string path)
 {
+    if(!pca.eigenvalues.empty())
+        return;
+    
     cv::FileStorage fsread(path,cv::FileStorage::READ);
     pca.read(fsread.root());
 }

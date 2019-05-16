@@ -116,38 +116,25 @@ void ELM_IN_ELM_Model::loadMnistData(const std::string path, const float trainSa
 
 void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating, bool verbose)
 {
-    if(m_subModels.empty())
+    m_subModelToTrain.inputData_2d(m_trainImgs,m_trainLabelBins,m_width,m_height,m_channels);
+    m_subModelToTrain.inputData_2d_test(m_testImgs,m_testLabelBins);
+    
+    int randomState = (unsigned)time(NULL);
+    
+    //训练子模型
+    for(int i=0;i<m_n_models;i++)
     {
-        m_subModelToTrain.inputData_2d(m_trainImgs,m_trainLabelBins,m_width,m_height,m_channels);
-        m_subModelToTrain.inputData_2d_test(m_testImgs,m_testLabelBins);
+        if(m_subModelHiddenNodes[i] != -1)
+            m_subModelToTrain.setHiddenNodes(m_subModelHiddenNodes[i]);
+        m_subModelToTrain.setRandomState(randomState++);
+        m_subModelToTrain.fit(batchSize, validating,verbose);
+        m_subModelToTrain.save(m_modelPath+"subModel"+std::to_string(i)+".xml",
+                               m_modelPath+"subK"+std::to_string(i)+".xml");
         
-        int randomState = (unsigned)time(NULL);
-        
-        //训练子模型
-        for(int i=0;i<m_n_models;i++)
-        {
-            if(m_subModelHiddenNodes[i] != -1)
-                m_subModelToTrain.setHiddenNodes(m_subModelHiddenNodes[i]);
-            m_subModelToTrain.setRandomState(randomState++);
-            m_subModelToTrain.fit(batchSize, validating,verbose);
-            m_subModelToTrain.save(m_modelPath+"subModel"+std::to_string(i)+".xml",
-                                   m_modelPath+"subK"+std::to_string(i)+".xml");
-            
-            m_subModelToTrain.clear();
-        }
+        m_subModelToTrain.clear();
     }
-    else
-    {
-        for(int i=0;i<m_n_models;i++)
-        {
-            m_subModels[i].inputData_2d(m_trainImgs,m_trainLabelBins,m_width,m_height,m_channels);
-            m_subModels[i].inputData_2d_test(m_testImgs,m_testLabelBins);
-            
-            m_subModels[i].fit(batchSize, validating,verbose);
-            m_subModels[i].save(m_modelPath+"subModel"+std::to_string(i)+".xml",
-                                   m_modelPath+"subK"+std::to_string(i)+".xml");
-        }
-    }
+    
+    pcaFace.write("./data/pca/pcaFace.xml");
 }
 
 void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating, bool verbose)
@@ -315,6 +302,7 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
     fsread["C"]>>m_C;
     fsread["F"]>>m_F;
     fsread["label_string"]>>m_label_string;
+    
     pcaFace.read("./data/pca/pcaFace.xml");
 
     fsread.release();
@@ -326,8 +314,10 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
     //加载子模型
     m_subModels.resize(m_n_models);
     for(int m=0;m<m_n_models;m++)
+    {
         m_subModels[m].load(m_modelPath+"subModel"+std::to_string(m)+".xml",
                             m_modelPath+"subK"+std::to_string(m)+".xml");
+    }
     
     if(access("./data/face_database/lbpFeats.dat",F_OK) != -1)
         readFeats();

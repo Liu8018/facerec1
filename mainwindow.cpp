@@ -89,8 +89,8 @@ void MainWindow::setVideo(std::string video)
         exit(0);
     }
     
-    m_isDoFaceRec = false;
-    m_faceRecKeepTime = 500;
+    m_isDoFaceRec = true;
+    m_faceRecKeepTime = -1;
     
     //将timer与getframe连接
     connect(m_timer,SIGNAL(timeout()),this,SLOT(updateFrame()));
@@ -134,6 +134,10 @@ void MainWindow::setMethod(std::string method)
 void MainWindow::updateFrame()
 {
     m_capture >> m_frameSrc;
+    
+    if(m_frameSrc.empty())
+        exit(0);
+    
     cv::flip(m_frameSrc,m_frameSrc,1);
     m_frameSrc.copyTo(m_frame);
     
@@ -192,9 +196,12 @@ void MainWindow::updateFrame()
                 cv::putText(m_frame,"others",objects[0].tl(),1,2,cv::Scalar(255,100,0),2);
             
             //到达持续时间，停止检测
-            float keptTime = (cv::getTickCount()-m_faceRecStartTick)/cv::getTickFrequency();
-            if(keptTime > m_faceRecKeepTime)
-                m_isDoFaceRec = false;
+            if(m_faceRecKeepTime != -1)
+            {
+                float keptTime = (cv::getTickCount()-m_faceRecStartTick)/cv::getTickFrequency();
+                if(keptTime > m_faceRecKeepTime)
+                    m_isDoFaceRec = false;
+            }
         }
     }
     else
