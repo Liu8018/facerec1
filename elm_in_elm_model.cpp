@@ -134,7 +134,7 @@ void ELM_IN_ELM_Model::fitSubModels(int batchSize, bool validating, bool verbose
         m_subModelToTrain.clear();
     }
     
-    pcaFace.write("./data/pca/pcaFace.xml");
+    pcaFace.write("./data/face_database/pcaFace.xml");
 }
 
 void ELM_IN_ELM_Model::fitMainModel(int batchSize, bool validating, bool verbose)
@@ -274,7 +274,7 @@ void ELM_IN_ELM_Model::save()
     fswrite<<"C"<<m_C;
     fswrite<<"F"<<m_F;
     fswrite<<"label_string"<<m_label_string;
-    pcaFace.write("./data/pca/pcaFace.xml");
+    pcaFace.write("./data/face_database/pcaFace.xml");
     
     fswrite.release();
     
@@ -303,7 +303,7 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
     fsread["F"]>>m_F;
     fsread["label_string"]>>m_label_string;
     
-    pcaFace.read("./data/pca/pcaFace.xml");
+    pcaFace.read("./data/face_database/pcaFace.xml");
 
     fsread.release();
     
@@ -319,7 +319,7 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
                             m_modelPath+"subK"+std::to_string(m)+".xml");
     }
     
-    if(access("./data/face_database/lbpFeats.dat",F_OK) != -1)
+    if(access("./data/face_database/feats.dat",F_OK) != -1)
         readFeats();
 }
 
@@ -431,18 +431,12 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::map<float,std::stri
         
         for(int j=0;j<m_allFeats[id].size();j++)
         {
-            /*
-            std::cout<<"om:\n"<<om<<std::endl;
-            std::cout<<"prj:\n"<<prj<<std::endl;
-            std::cout<<"om - prj:\n"<<om - prj<<std::endl;
-            */
-            
             float b = cv::norm(m_allFeats[id][j]);
             float c = cv::norm(om - m_allFeats[id][j]);
             
             float sim = (a*a+b*b-c*c)/(2*a*b);
             
-            //std::cout<<name<<": "<<sim<<std::endl;
+            sim = sim*0.5 + 0.5;
             
             if(similarity == -1)
                 similarity = sim;
@@ -486,7 +480,7 @@ void ELM_IN_ELM_Model::calcFeats()
 }
 void ELM_IN_ELM_Model::writeFeats()
 {
-    cv::FileStorage fswrite("./data/face_database/lbpFeats.dat",cv::FileStorage::WRITE);
+    cv::FileStorage fswrite("./data/face_database/feats.dat",cv::FileStorage::WRITE);
     
     fswrite<<"allFeats"<<m_allFeats;
     
@@ -495,7 +489,7 @@ void ELM_IN_ELM_Model::writeFeats()
 
 void ELM_IN_ELM_Model::readFeats()
 {
-    cv::FileStorage fsread("./data/face_database/lbpFeats.dat",cv::FileStorage::READ);
+    cv::FileStorage fsread("./data/face_database/feats.dat",cv::FileStorage::READ);
     
     fsread["allFeats"]>>m_allFeats;
     

@@ -44,6 +44,9 @@ void handleFaceDb(int method)
         std::map<std::string, std::string> files;
         getFiles("./data/face_database",files);
         
+        if(files.empty())
+            return;
+        
         //人脸检测初始化
         FaceDetection detection;
 

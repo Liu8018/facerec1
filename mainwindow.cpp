@@ -116,18 +116,21 @@ void MainWindow::setMethod(std::string method)
     
     if(m_rec.method == "elm")
     {
-        //ELM_IN_ELM人脸识别初始化
-        if(access("./data/ELM_Models/mainModel.xml",F_OK) == -1)
-            m_rec.init_updateEIEdb();
-        else
-            m_rec.init_loadEIEdb();
-        
         std::map<std::string, std::string> files;
         getFiles("./data/face_database",files);
         if(files.empty())
             isEmptyRun = true;
         else
             isEmptyRun = false;
+        
+        if(!isEmptyRun)
+        {
+            //ELM_IN_ELM人脸识别初始化
+            if(access("./data/ELM_Models/mainModel.xml",F_OK) == -1)
+                m_rec.init_updateEIEdb();
+            else
+                m_rec.init_loadEIEdb();
+        }
     }
 }
 
@@ -160,7 +163,7 @@ void MainWindow::updateFrame()
         //绘制检测结果
         cv::rectangle(m_frame,objects[0],cv::Scalar(0,255,255),2);
         
-        if(m_isDoFaceRec)
+        if(m_isDoFaceRec && !isEmptyRun)
         {
             std::string name;
             bool isInFaceDb = false;

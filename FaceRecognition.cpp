@@ -67,8 +67,8 @@ void FaceRecognition::init_loadResnetDb()
 
 void FaceRecognition::init_updateEIEdb()
 {
-    refitEIEModel();
-    
+    handleFaceDb(1);
+
     m_eieModel.load("./data/ELM_Models");
 }
 

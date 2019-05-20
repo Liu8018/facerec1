@@ -78,7 +78,7 @@ void getLbpData(const std::vector<cv::Mat> &faces, cv::Mat &data)
     vectors2mat(feats,data);
 }
 
-#define USE_HIGHDIM_LBP 0
+#define USE_HIGHDIM_LBP 1
 
 void PCA_Face::calc_face(std::vector<cv::Mat> &faces)
 {

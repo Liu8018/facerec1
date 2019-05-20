@@ -2,6 +2,8 @@
 
 void refitEIEModel()
 {
+    pcaFace = PCA_Face();
+    
     std::string faceDbPath = "./data/face_database";
     std::string eieModelPath = "./data/ELM_Models";
     
@@ -91,7 +93,8 @@ void getFiles(std::string path, std::map<std::string, std::string> &files)
 		{
 			std::string fn(ptr->d_name);
             
-            if(fn.substr(fn.length()-3,fn.length()-1) == "dat")
+            std::string tail = fn.substr(fn.length()-3,fn.length()-1);
+            if(tail == "dat" || tail == "xml")
                 continue;
             
             std::string className = path;
