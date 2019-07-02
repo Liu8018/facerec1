@@ -2,15 +2,37 @@
 
 FaceDetection::FaceDetection()
 {
-    m_ffd = dlib::get_frontal_face_detector();
+    m_net = cv::dnn::readNet(
+                "./data/face_detection/opencv_face_detector_uint8.pb",
+                "./data/face_detection/opencv_face_detector.pbtxt");
 }
 
-void FaceDetection::detect(const cv::Mat &src, std::vector<cv::Rect> &faceRects)
+void FaceDetection::detect(const cv::Mat &img, std::vector<cv::Rect> &boxes)
 {
-    dlib::array2d<dlib::bgr_pixel> img;
-    dlib::assign_image(img, dlib::cv_image<dlib::bgr_pixel>(src));
-    std::vector<dlib::rectangle> dets = m_ffd(img);
+    boxes.clear();
     
-    if(!dets.empty())
-        faceRects.push_back(cv::Rect(dets[0].left(),dets[0].top(),dets[0].width(),dets[0].height()));
+    cv::Mat blob = cv::dnn::blobFromImage(img,1.0,cv::Size(300,300),cv::Scalar(104,117,123),true,false);
+    
+    m_net.setInput(blob);
+    cv::Mat detectionMat = m_net.forward();
+    cv::Mat detections(detectionMat.size[2], detectionMat.size[3], CV_32F, detectionMat.ptr<float>());
+    
+    for (int i = 0; i < detections.rows; i++)
+    {
+        float confidence = detections.at<float>(i, 2);
+
+        if (confidence > CONFIDENCE_THRESHOLD)
+        {
+            int xLeftBottom = static_cast<int>(detections.at<float>(i, 3) * img.cols);
+            int yLeftBottom = static_cast<int>(detections.at<float>(i, 4) * img.rows);
+            int xRightTop = static_cast<int>(detections.at<float>(i, 5) * img.cols);
+            int yRightTop = static_cast<int>(detections.at<float>(i, 6) * img.rows);
+
+            cv::Rect rect(xLeftBottom, yLeftBottom,
+                (xRightTop - xLeftBottom),
+                (yRightTop - yLeftBottom));
+            
+            boxes.push_back(rect);
+        }
+    }
 }

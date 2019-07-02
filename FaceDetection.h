@@ -1,12 +1,8 @@
 #ifndef FACEDETECTOR_H
 #define FACEDETECTOR_H
 
-#include <dlib/image_processing/frontal_face_detector.h>
-#include <dlib/image_processing/render_face_detections.h>
-#include <dlib/image_processing.h>
-#include <dlib/gui_widgets.h>
-#include <dlib/image_io.h>
-#include <dlib/opencv.h>
+#include "params.h"
+#include <opencv2/dnn.hpp>
 
 
 class FaceDetection
@@ -14,10 +10,10 @@ class FaceDetection
 public:
     FaceDetection();
     
-    void detect(const cv::Mat &src, std::vector<cv::Rect> &faceRects);
+    void detect(const cv::Mat &img, std::vector<cv::Rect> &boxes);
     
 private:
-    dlib::frontal_face_detector m_ffd;
+    cv::dnn::Net m_net;
 };
 
 #endif // FACEDETECTOR_H

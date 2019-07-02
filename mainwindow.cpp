@@ -105,6 +105,13 @@ void MainWindow::setMethod(std::string method)
     //m_rec = FaceRecognition("elm");
     m_rec = FaceRecognition(method);
     
+    std::map<std::string, std::string> files;
+    getFiles("./data/face_database",files);
+    if(files.empty())
+        isEmptyRun = true;
+    else
+        isEmptyRun = false;
+
     if(m_rec.method == "resnet")
     {
         //resnet人脸识别初始化
@@ -116,13 +123,6 @@ void MainWindow::setMethod(std::string method)
     
     if(m_rec.method == "elm")
     {
-        std::map<std::string, std::string> files;
-        getFiles("./data/face_database",files);
-        if(files.empty())
-            isEmptyRun = true;
-        else
-            isEmptyRun = false;
-        
         if(!isEmptyRun)
         {
             //ELM_IN_ELM人脸识别初始化

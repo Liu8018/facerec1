@@ -47,6 +47,7 @@ HEADERS += \
     ELM_functions.h \
     elm_in_elm_model.h \
     elm_model.h \
+    params.h \
     pca.h \
     functions2.h
 
@@ -55,7 +56,7 @@ FORMS += \
     SignUpDialog.ui
 
 INCLUDEPATH += $$PWD/include
-LIBS += -L$$PWD/libs/ -ldlib -lpthread -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs
+LIBS += -L$$PWD/libs/ -ldlib -lpthread -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs -lopencv_dnn
 
 RESOURCES += \
     resources.qrc
